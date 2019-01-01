@@ -289,6 +289,7 @@ ge25519_double_scalarmult_vartime(ge25519 *r, const ge25519 *p1, const bignum256
 
 		ge25519_p1p1_to_partial(r, &t);
 	}
+	curve25519_mul(r->t, t.x, t.y);
 }
 
 
