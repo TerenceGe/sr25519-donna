@@ -6,12 +6,14 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -m32")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_definitions(-DED25519_CUSTOMRANDOM)
 add_definitions(-DED25519_CUSTOMHASH)
+add_definitions(-DED25519_NO_INLINE_ASM)
+add_definitions(-DED25519_FORCE_32BIT)
 
 set(SOURCE_FILES
   src/memzero.h
