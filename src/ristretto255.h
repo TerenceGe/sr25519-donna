@@ -17,6 +17,5 @@ int ristretto_decode(ge25519 *element, const unsigned char bytes[32]);
 void ristretto_encode(unsigned char bytes[32], const ge25519 element);
 int ristretto_from_uniform_bytes(ristretto_point_t *element, const unsigned char bytes[64]);
 int ristretto_ct_eq(const ristretto_point_t *a, const ristretto_point_t *b);
-void ge25519_pack_without_parity(unsigned char bytes[32], const ge25519 *p);
 
 #endif
