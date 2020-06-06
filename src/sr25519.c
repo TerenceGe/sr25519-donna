@@ -1,10 +1,9 @@
 #include <string.h>
-#include "ed25519-donna/ed25519-donna.h"
-#include "randombytes/randombytes.h"
+#include "sr25519-randombytes.h"
+#include "sr25519-hash.h"
 #include "sr25519.h"
 #include "ristretto255.h"
 #include "merlin.h"
-#include "sha2.h"
 #include "memzero.h"
 
 void divide_scalar_bytes_by_cofactor(uint8_t *scalar, size_t scalar_len) {
@@ -31,6 +30,7 @@ void multiply_scalar_bytes_by_cofactor(uint8_t *scalar, size_t scalar_len) {
 
 void expand_ed25519(sr25519_secret_key_key key, sr25519_secret_key_nonce nonce, const sr25519_mini_secret_key mini_secret_key) {
     uint8_t hash[64] = {0};
+    // sr25519_hash(mini_secret_key, hash, 32);
     sha512_Raw(mini_secret_key, 32, hash);
     memcpy(key, hash, 32);
     key[0]  &= 248;
@@ -112,7 +112,7 @@ void private_key_to_publuc_key(sr25519_public_key public_key, sr25519_secret_key
     bignum256modm s = {0};
     expand_raw256_modm(s, private_key);
 
-    ge25519_scalarmult_base_wrapper(&P, s);
+    ge25519_scalarmult_base_niels(&P, ge25519_niels_base_multiples, s);
     ristretto_encode(public_key, P);
 
     memzero(&P, sizeof(P));
@@ -196,9 +196,9 @@ void sr25519_derive_public_soft(sr25519_public_key public_out, const sr25519_pub
     derive_scalar_and_chaincode(&t, &scalar, chain_code_out, public_in, chain_code_in);
 
     ge25519 P1 = {0}, P2 ={0}, P = {0};
-    ge25519_scalarmult_base_wrapper(&P1, scalar);
+    ge25519_scalarmult_base_niels(&P1, ge25519_niels_base_multiples, scalar);
     ristretto_decode(&P2, public_in);
-    ge25519_add(&P, &P1, &P2, 0);
+    ge25519_add(&P, &P1, &P2);
     ristretto_encode(public_out, P);
 
     memzero(scalar, sizeof(scalar));
@@ -236,7 +236,7 @@ void sr25519_sign(sr25519_signature signature_out, const sr25519_public_key publ
     expand256_modm(r, scalar_bytes, 64);
 
     ge25519 R = {0};
-    ge25519_scalarmult_base_wrapper(&R, r);
+    ge25519_scalarmult_base_niels(&R, ge25519_niels_base_multiples, r);
     uint8_t R_compressed[32] = {0};
     ristretto_encode(R_compressed, R);
     merlin_transcript_commit_bytes(&t, (uint8_t *)"sign:R", 6, R_compressed, 32);
@@ -320,22 +320,23 @@ bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, u
     expand256_modm(k, buf, 64);
     expand_raw256_modm(s, signature_s);
 
-    int is_canonical = is_reduced256_modm(s);
+    /* int is_canonical = is_reduced256_modm(s); */
 
-    if (!is_canonical) {
-        memzero(&t, sizeof(t));
-        memzero(signature_R, sizeof(signature_R));
-        memzero(signature_s, sizeof(signature_s));
-        memzero(k, sizeof(k));
-        memzero(s, sizeof(s));
-        memzero(buf, sizeof(buf));
+    /* if (!is_canonical) { */
+    /*     memzero(&t, sizeof(t)); */
+    /*     memzero(signature_R, sizeof(signature_R)); */
+    /*     memzero(signature_s, sizeof(signature_s)); */
+    /*     memzero(k, sizeof(k)); */
+    /*     memzero(s, sizeof(s)); */
+    /*     memzero(buf, sizeof(buf)); */
 
-        return false;
-    }
+    /*     return false; */
+    /* } */
 
     ge25519 A = {0}, R = {0};
     ristretto_decode(&A, public);
-    ge25519_neg_full(&A);
+    curve25519_neg(A.x, A.x);
+    curve25519_neg(A.t, A.t);
     ge25519_double_scalarmult_vartime(&R, &A, k, s);
 
     uint8_t R_compressed[32] = {0};

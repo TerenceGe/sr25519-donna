@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "sr25519-donna.h"
+#include "print.h"
 
 #define FROMHEX_MAXLEN 512
 
@@ -53,6 +54,7 @@ void can_sign_and_verify_message() {
     memcpy(private, keypair, 64);
     sr25519_public_key public = {0};
     memcpy(public, keypair + 64, 32);
+    print_hash(keypair, 96);
     uint8_t *message = "this is a message";
     sr25519_signature signature = {0};
     sr25519_sign(signature, public, private, message, strlen(message));
