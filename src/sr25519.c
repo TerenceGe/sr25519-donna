@@ -28,10 +28,9 @@ void multiply_scalar_bytes_by_cofactor(uint8_t *scalar, size_t scalar_len) {
     }
 }
 
-void expand_ed25519(sr25519_secret_key_key key, sr25519_secret_key_nonce nonce, const sr25519_mini_secret_key mini_secret_key) {
+void expand_ed25519(sr25519_secret_key_key key, sr25519_secret_key_nonce nonce, sr25519_mini_secret_key mini_secret_key) {
     uint8_t hash[64] = {0};
-    // sr25519_hash(mini_secret_key, hash, 32);
-    sha512_Raw(mini_secret_key, 32, hash);
+    sr25519_hash(hash, mini_secret_key, 32);
     memcpy(key, hash, 32);
     key[0]  &= 248;
     key[31] &= 63;
