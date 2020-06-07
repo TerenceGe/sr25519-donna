@@ -1,0 +1,39 @@
+#+title: installation
+
+* Compilation
+** Default Options
+#+BEGIN_SRC sh
+git clone git@github.com:TerenceGe/sr25519-donna.git
+cd sr25519-donna
+mkdir build && cd build
+cmake .. && make
+#+END_SRC
+** Random Options
+This library uses a build-in random number generator by default. To use a custom random function, use -DSR25519_CUSTOMRANDOM=true for cmake
+#+BEGIN_SRC sh
+cmake .. -DSR25519_CUSTOMRANDOM=true && make
+#+END_SRC
+put your custom random implementation in sr25519-randombytes-custom.h. The random function must implement:
+#+BEGIN_SRC C
+  void sr25519_randombytes(void *p, size_t len);
+#+END_SRC
+** Hash Options
+This library uses a build-in sha2 hash function by default. To use a custom hash function, use -DSR25519_CUSTOMHASH=true for cmake
+#+BEGIN_SRC sh
+cmake .. -DSR25519_CUSTOMRANDOM=true && make
+#+END_SRC
+put your custom random implementation in sr25519-randombytes-custom.h. The random function must implement:
+#+BEGIN_SRC C
+  struct sr25519_hash_context;
+
+  void sr25519_hash_init(sr25519_hash_context *ctx);
+  void sr25519_hash_update(sr25519_hash_context *ctx, const uint8_t *in, size_t inlen);
+  void sr25519_hash_final(sr25519_hash_context *ctx, uint8_t *hash);
+  void sr25519_hash(uint8_t *hash, const uint8_t *in, size_t inlen);
+#+END_SRC
+** Curve Operation Options
+This library supports both 32bit and 64bit curve operations, the default is according to your machine.
+Use -DSR25519_FORCE_32BIT to force the use of 32 bit routines even when compiling for 64 bit.
+#+BEGIN_SRC sh
+cmake .. -DSR25519_FORCE_32BIT=true && make
+#+END_SRC

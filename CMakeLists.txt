@@ -8,12 +8,23 @@ endif()
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-c -O3")
 
 add_definitions(-DED25519_CUSTOMRANDOM)
 add_definitions(-DED25519_CUSTOMHASH)
 add_definitions(-DED25519_NO_INLINE_ASM)
-# add_definitions(-DED25519_FORCE_32BIT)
+
+if(SR25519_FORCE_32BIT)
+  add_definitions(-DED25519_FORCE_32BIT)
+endif()
+
+if(SR25519_CUSTOMRANDOM)
+  add_definitions(-DSR25519_CUSTOMRANDOM)
+endif()
+
+if(SR25519_CUSTOMHASH)
+  add_definitions(-DSR25519_CUSTOMHASH)
+endif()
 
 set(SOURCE_FILES
   src/ed25519-donna/curve25519-donna-32bit.h
@@ -42,7 +53,6 @@ set(SOURCE_FILES
   src/ed25519-donna/modm-donna-32bit.h
   src/ed25519-donna/modm-donna-64bit.h
   src/ed25519-donna/regression.h
-
 
   src/memzero.h
   src/memzero.c
