@@ -1,7 +1,7 @@
 #include <string.h>
+#include "sr25519.h"
 #include "sr25519-randombytes.h"
 #include "sr25519-hash.h"
-#include "sr25519.h"
 #include "ristretto255.h"
 #include "merlin.h"
 #include "memzero.h"

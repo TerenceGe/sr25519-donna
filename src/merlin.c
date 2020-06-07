@@ -5,6 +5,7 @@
 #include <string.h>
 #include "merlin.h"
 #include "memzero.h"
+#include "sr25519-randombytes.h"
 
 /******** The Keccak-f[1600] permutation ********/
 

@@ -1,3 +1,6 @@
+#ifndef __SR25519_HASH_H__
+#define __SR25519_HASH_H__
+
 #if defined(SR25519_CUSTOMHASH)
 
 #include "sr25519-hash-custom.h"
@@ -27,5 +30,7 @@ static void
 sr25519_hash(uint8_t *hash, const uint8_t *in, size_t inlen) {
     sha512_Raw(in, inlen, hash);
 }
+
+#endif
 
 #endif
