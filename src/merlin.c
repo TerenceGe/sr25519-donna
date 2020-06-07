@@ -5,7 +5,7 @@
 #include <string.h>
 #include "merlin.h"
 #include "memzero.h"
-#include "randombytes/randombytes.h"
+#include "sr25519-randombytes.h"
 
 /******** The Keccak-f[1600] permutation ********/
 
@@ -237,7 +237,7 @@ void merlin_commit_witness_bytes(merlin_transcript* mctx, uint8_t* dest, size_t 
     merlin_rng_commit_witness_bytes(&mrng, label, label_len, witness, witness_len);
 
     uint8_t entropy[32] = {0};
-    randombytes_buf(entropy, 32);
+    sr25519_randombytes(entropy, 32);
     merlin_rng_finalize(&mrng, entropy);
     merlin_rng_random_bytes(&mrng, dest, dest_len);
 

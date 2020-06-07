@@ -9,15 +9,26 @@
 	void ed25519_hash(uint8_t *hash, const uint8_t *in, size_t inlen);
 */
 
-#ifndef ED25519_HASH_CUSTOM
-#define ED25519_HASH_CUSTOM
+#include "sr25519-hash.h"
 
-#include "sha2.h"
+typedef sr25519_hash_context ed25519_hash_context;
 
-#define ed25519_hash_context SHA512_CTX
-#define ed25519_hash_init(ctx) sha512_Init(ctx)
-#define ed25519_hash_update(ctx, in, inlen) sha512_Update((ctx), (in), (inlen))
-#define ed25519_hash_final(ctx, hash) sha512_Final((ctx), (hash))
-#define ed25519_hash(hash, in, inlen) sha512_Raw((in), (inlen), (hash))
+static void
+ed25519_hash_init(ed25519_hash_context *ctx) {
+    sr25519_hash_init(ctx);
+}
 
-#endif // ED25519_HASH_CUSTOM
+static void
+ed25519_hash_update(ed25519_hash_context *ctx, const uint8_t *in, size_t inlen) {
+    sr25519_hash_update(ctx, in, inlen);
+}
+
+static void
+ed25519_hash_final(ed25519_hash_context *ctx, uint8_t *hash) {
+    sr25519_hash_final(ctx, hash);
+}
+
+static void
+ed25519_hash(uint8_t *hash, const uint8_t *in, size_t inlen) {
+    sr25519_hash(hash, in, inlen);
+}
