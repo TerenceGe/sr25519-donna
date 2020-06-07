@@ -46,7 +46,7 @@ void can_sign_and_verify_message() {
     printf("test can sign and verify message: ");
 
     sr25519_mini_secret_key seed = {0};
-    randombytes_buf(seed, 32);
+    sr25519_randombytes(seed, 32);
     sr25519_keypair keypair = {0};
     sr25519_keypair_from_seed(keypair, seed);
     sr25519_secret_key private = {0};

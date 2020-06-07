@@ -93,7 +93,7 @@ void derived_secret_key_simple(sr25519_secret_key_key key_out, sr25519_secret_ke
     merlin_rng_commit_witness_bytes(&mrng, (uint8_t *)"HDKD-nonce", 10, witness_data, 64);
 
     uint8_t entropy[32] = {0};
-    randombytes_buf(entropy, 32);
+    sr25519_randombytes(entropy, 32);
     merlin_rng_finalize(&mrng, entropy);
     merlin_rng_random_bytes(&mrng, nonce_out, 32);
 
@@ -229,7 +229,7 @@ void sr25519_sign(sr25519_signature signature_out, const sr25519_public_key publ
     merlin_rng_init(&mrng, &t);
     merlin_rng_commit_witness_bytes(&mrng, (uint8_t *)"signing", 7, secret_nonce, 32);
     uint8_t entropy[32] = {0};
-    randombytes_buf(entropy, 32);
+    sr25519_randombytes(entropy, 32);
     merlin_rng_finalize(&mrng, entropy);
     merlin_rng_random_bytes(&mrng, scalar_bytes, 32);
     expand256_modm(r, scalar_bytes, 64);

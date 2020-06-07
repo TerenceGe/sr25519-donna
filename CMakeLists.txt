@@ -18,7 +18,6 @@ add_definitions(-DED25519_NO_INLINE_ASM)
 set(SOURCE_FILES
   src/memzero.h
   src/sha2.h
-  src/print.h
 
   src/ed25519-donna/curve25519-donna-32bit.h
   src/ed25519-donna/curve25519-donna-64bit.h
@@ -57,7 +56,6 @@ set(SOURCE_FILES
 
   src/memzero.c
   src/sha2.c
-  src/print.c
 
   src/randombytes/core.c
   src/randombytes/randombytes.c
