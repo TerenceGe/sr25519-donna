@@ -7,7 +7,7 @@
 
 #else
 
-#include "randombytes/randombytes.h"
+#include "sr25519-randombytes-default.h"
 
 static void sr25519_randombytes(void *p, size_t len) {
   randombytes_buf(p, len);

@@ -11,7 +11,7 @@
 
 #include "core.h"
 /* #include "crypto_stream_chacha20.h" */
-#include "randombytes/randombytes.h"
+#include "sr25519-randombytes-default.h"
 #ifndef RANDOMBYTES_CUSTOM_IMPLEMENTATION
 # ifdef RANDOMBYTES_DEFAULT_IMPLEMENTATION
 #  include "randombytes_internal.h"

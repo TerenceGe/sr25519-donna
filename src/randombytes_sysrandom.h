@@ -1,7 +1,7 @@
 #ifndef randombytes_sysrandom_H
 #define randombytes_sysrandom_H
 
-#include "randombytes/randombytes.h"
+#include "sr25519-randombytes-default.h"
 
 #ifdef __cplusplus
 extern "C" {

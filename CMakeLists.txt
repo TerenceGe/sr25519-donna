@@ -62,24 +62,32 @@ set(SOURCE_FILES
   src/merlin.c
   src/ristretto255.h
   src/ristretto255.c
-  src/sr25519.h
   src/sr25519.c
-  src/sr25519-donna.h
 
-  src/randombytes/core.h
-  src/randombytes/core.c
-  src/randombytes/randombytes_sysrandom.h
-  src/randombytes/randombytes_sysrandom.c
-  src/randombytes/randombytes.h
-  src/randombytes/randombytes.c
+  src/core.h
+  src/core.c
+  src/randombytes_sysrandom.h
+  src/randombytes_sysrandom.c
+  src/sr25519-randombytes-default.c
 
   src/sr25519-hash-custom.h
   src/sr25519-hash.h
-  src/sr25519-randombytes-custom.h
+  )
+
+set(INCLUDE_FILES
+  src/sr25519.h
+  src/sr25519-donna.h
   src/sr25519-randombytes.h
+  src/sr25519-randombytes-custom.h
+  src/sr25519-randombytes-default.h
   )
 
 add_library(sr25519_donna SHARED ${SOURCE_FILES})
+add_library(sr25519_donna_static STATIC ${SOURCE_FILES})
+
+install(TARGETS sr25519_donna DESTINATION lib)
+install(TARGETS sr25519_donna_static DESTINATION lib)
+install(FILES ${INCLUDE_FILES} DESTINATION include)
 
 enable_testing()
 
