@@ -1,7 +1,7 @@
 #ifndef sodium_core_H
 #define sodium_core_H
 
-#include "randombytes/randombytes.h"
+#include "sr25519-randombytes-default.h"
 
 #ifdef __cplusplus
 extern "C" {

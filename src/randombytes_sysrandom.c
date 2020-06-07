@@ -44,7 +44,7 @@
 #endif
 
 #include "core.h"
-#include "randombytes/randombytes.h"
+#include "sr25519-randombytes-default.h"
 #include "randombytes_sysrandom.h"
 
 #define COMPILER_ASSERT(X) (void) sizeof(char[(X) ? 1 : -1])

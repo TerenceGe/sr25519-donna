@@ -24,7 +24,7 @@ This library uses a build-in sha2 hash function by default. To use a custom hash
 #+BEGIN_SRC sh
 cmake .. -DSR25519_CUSTOMRANDOM=true
 #+END_SRC
-put your custom random implementation in sr25519-randombytes-custom.h. The random function must implement:
+put your custom random implementation in sr25519-hash-custom.h. The random function must implement:
 #+BEGIN_SRC C
   struct sr25519_hash_context;
 
