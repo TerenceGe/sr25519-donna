@@ -2,8 +2,92 @@
 
 This is a pure C implementation of polkadot's key derivation and signing algorithm [[https://wiki.polkadot.network/docs/en/learn-cryptography][schnorrkel]]. The goal is to fully compatible with the original [[https://github.com/w3f/schnorrkel][rust version]]. The curve operations are based on [[https://github.com/floodyberry/ed25519-donna][ed25519-donna]].
 
-* Documentation
-[[https://github.com/TerenceGe/sr25519-donna/blob/master/doc.org][sr25519-donna documentation]]
+* Compilation
+** Default Options
+#+BEGIN_SRC sh
+git clone git@github.com:TerenceGe/sr25519-donna.git
+cd sr25519-donna
+mkdir build && cd build
+cmake .. && make
+#+END_SRC
+** Random Options
+This library uses a build-in random number generator by default. To use a custom random function, use -DSR25519_CUSTOMRANDOM=true for cmake
+#+BEGIN_SRC sh
+cmake .. -DSR25519_CUSTOMRANDOM=true
+#+END_SRC
+put your custom random implementation in sr25519-randombytes-custom.h. The random function must implement:
+#+BEGIN_SRC C
+  void sr25519_randombytes(void *p, size_t len);
+#+END_SRC
+** Hash Options
+This library uses a build-in sha2 hash function by default. To use a custom hash function, use -DSR25519_CUSTOMHASH=true for cmake
+#+BEGIN_SRC sh
+cmake .. -DSR25519_CUSTOMRANDOM=true
+#+END_SRC
+put your custom random implementation in sr25519-randombytes-custom.h. The random function must implement:
+#+BEGIN_SRC C
+  struct sr25519_hash_context;
+
+  void sr25519_hash_init(sr25519_hash_context *ctx);
+  void sr25519_hash_update(sr25519_hash_context *ctx, const uint8_t *in, size_t inlen);
+  void sr25519_hash_final(sr25519_hash_context *ctx, uint8_t *hash);
+  void sr25519_hash(uint8_t *hash, const uint8_t *in, size_t inlen);
+#+END_SRC
+** Curve Operation Options
+This library supports both 32bit and 64bit curve operations, the default is according to your machine.
+Use -DSR25519_FORCE_32BIT to force the use of 32 bit routines even when compiling for 64 bit.
+#+BEGIN_SRC sh
+cmake .. -DSR25519_FORCE_32BIT=true
+#+END_SRC
+
+* Test
+#+BEGIN_SRC sh
+./sr25519DonnaTests
+#+END_SRC
+* Usage
+** include
+#+BEGIN_SRC C
+    #include "sr25519-donna.h"
+#+END_SRC
+** create keypair from seed
+#+BEGIN_SRC C
+void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key seed);
+#+END_SRC
+** sign message
+#+BEGIN_SRC C
+void sr25519_sign(sr25519_signature signature, const sr25519_public_key public, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length);
+#+END_SRC
+** verify message
+#+BEGIN_SRC C
+bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public);
+#+END_SRC
+** soft derive keypair
+#+BEGIN_SRC C
+void sr25519_derive_keypair_soft(sr25519_keypair derived, const sr25519_keypair keypair, const sr25519_chain_code chain_code);
+#+END_SRC
+** soft derive public key
+#+BEGIN_SRC C
+void sr25519_derive_public_soft(sr25519_public_key derived_public, const sr25519_public_key public, const sr25519_chain_code chain_code);
+#+END_SRC
+** hard derive keypair
+#+BEGIN_SRC C
+void sr25519_derive_keypair_hard(sr25519_keypair derived, const sr25519_keypair keypair, const sr25519_chain_code chain_code);
+#+END_SRC
+** random number generator
+#+BEGIN_SRC C
+void sr25519_randombytes(void *p, size_t len);
+#+END_SRC
+** sr25519 types
+#+BEGIN_SRC C
+typedef uint8_t sr25519_mini_secret_key[32];
+typedef uint8_t sr25519_secret_key[64];
+typedef uint8_t sr25519_secret_key_key[32];
+typedef uint8_t sr25519_secret_key_nonce[32];
+typedef uint8_t sr25519_chain_code[32];
+typedef uint8_t sr25519_public_key[32];
+typedef uint8_t sr25519_keypair[96];
+typedef uint8_t sr25519_signature[64];
+#+END_SRC
 * Author
 [[https://github.com/TerenceGe][Terence Ge]]
 * License
