@@ -8,7 +8,7 @@ This is a pure C implementation of polkadot's key derivation and signing algorit
 git clone git@github.com:TerenceGe/sr25519-donna.git
 cd sr25519-donna
 mkdir build && cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=. && make
+cmake .. -DCMAKE_INSTALL_PREFIX=. && make install # The options "-DCMAKE_INSTALL_PREFIX=." will install library in the build folder, you can change the location if you want.
 #+END_SRC
 ** Random Options
 This library uses a build-in random number generator by default. To use a custom random function, add -DSR25519_CUSTOMRANDOM=true for cmake
@@ -40,6 +40,15 @@ Add -DSR25519_FORCE_32BIT to force the use of 32 bit routines even when compilin
 cmake .. -DSR25519_FORCE_32BIT=true
 #+END_SRC
 
+* Integration
+#+BEGIN_SRC cmake
+include_directories(../build/include/) # replace it with your sr25519-donna installed location if required
+link_directories(../build/lib/) # replace it with your sr25519-donna installed location if required
+
+add_executable(yourApp ${SOURCE_FILES})
+target_link_libraries(yourApp libsr25519_donna.dylib) # replace it with libsr25519_donna_static.a if you want to use static lib.
+
+#+END_SRC
 * Test
 #+BEGIN_SRC sh
 ./sr25519DonnaTests

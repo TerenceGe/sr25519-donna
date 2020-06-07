@@ -14,4 +14,4 @@ include_directories(../build/include/) # replace it with your sr25519-donna inst
 link_directories(../build/lib/) # replace it with your sr25519-donna installed location if required
 
 add_executable(sr25519DonnaExample ${SOURCE_FILES})
-target_link_libraries(sr25519DonnaExample libsr25519_donna_static.a)
+target_link_libraries(sr25519DonnaExample libsr25519_donna.dylib) # replace it with libsr25519_donna_static.a if you want to use static lib.
