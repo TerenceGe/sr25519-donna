@@ -10,11 +10,8 @@ set(SOURCE_FILES
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-include_directories(../build/include/)
-link_directories(../build/lib/)
-
-add_library(sr25519_donna STATIC IMPORTED)
-# set_property(TARGET sr25519_donna PROPERTY IMPORTED_LOCATION ../_install/lib/libsr25519_donna_static.a)
+include_directories(../build/include/) # replace it with your sr25519-donna installed location if required
+link_directories(../build/lib/) # replace it with your sr25519-donna installed location if required
 
 add_executable(sr25519DonnaExample ${SOURCE_FILES})
-target_link_libraries(sr25519DonnaExample sr25519_donna)
+target_link_libraries(sr25519DonnaExample libsr25519_donna_static.a)

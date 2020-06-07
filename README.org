@@ -8,10 +8,10 @@ This is a pure C implementation of polkadot's key derivation and signing algorit
 git clone git@github.com:TerenceGe/sr25519-donna.git
 cd sr25519-donna
 mkdir build && cd build
-cmake .. && make
+cmake .. -DCMAKE_INSTALL_PREFIX=. && make
 #+END_SRC
 ** Random Options
-This library uses a build-in random number generator by default. To use a custom random function, use -DSR25519_CUSTOMRANDOM=true for cmake
+This library uses a build-in random number generator by default. To use a custom random function, add -DSR25519_CUSTOMRANDOM=true for cmake
 #+BEGIN_SRC sh
 cmake .. -DSR25519_CUSTOMRANDOM=true
 #+END_SRC
@@ -20,7 +20,7 @@ put your custom random implementation in sr25519-randombytes-custom.h. The rando
   void sr25519_randombytes(void *p, size_t len);
 #+END_SRC
 ** Hash Options
-This library uses a build-in sha2 hash function by default. To use a custom hash function, use -DSR25519_CUSTOMHASH=true for cmake
+This library uses a build-in sha2 hash function by default. To use a custom hash function, add -DSR25519_CUSTOMHASH=true for cmake
 #+BEGIN_SRC sh
 cmake .. -DSR25519_CUSTOMRANDOM=true
 #+END_SRC
@@ -35,7 +35,7 @@ put your custom random implementation in sr25519-hash-custom.h. The random funct
 #+END_SRC
 ** Curve Operation Options
 This library supports both 32bit and 64bit curve operations, the default is according to your machine.
-Use -DSR25519_FORCE_32BIT to force the use of 32 bit routines even when compiling for 64 bit.
+Add -DSR25519_FORCE_32BIT to force the use of 32 bit routines even when compiling for 64 bit.
 #+BEGIN_SRC sh
 cmake .. -DSR25519_FORCE_32BIT=true
 #+END_SRC
