@@ -45,7 +45,6 @@ cmake .. -DSR25519_FORCE_32BIT=true
 ./sr25519DonnaTests
 #+END_SRC
 * Integration
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/CMakeLists.txt#L13][example]]
 #+BEGIN_SRC cmake
 include_directories(../build/include/) # replace it with your sr25519-donna installed location if required
 link_directories(../build/lib/) # replace it with your sr25519-donna installed location if required
@@ -54,41 +53,42 @@ add_executable(yourApp ${SOURCE_FILES})
 target_link_libraries(yourApp libsr25519_donna.dylib) # replace it with libsr25519_donna_static.a if you want to use static lib.
 
 #+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/CMakeLists.txt#L13][example]]
 * Usage
 ** include
 #+BEGIN_SRC C
     #include "sr25519-donna.h"
 #+END_SRC
 ** create keypair from seed
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L27][example]]
 #+BEGIN_SRC C
 void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key seed);
 #+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L27][example]]
 ** sign message
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L45][example]]
 #+BEGIN_SRC C
 void sr25519_sign(sr25519_signature signature, const sr25519_public_key public, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length);
 #+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L45][example]]
 ** verify message
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L64][example]]
 #+BEGIN_SRC C
 bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public);
 #+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L64][example]]
 ** soft derive keypair
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L77][example]]
 #+BEGIN_SRC C
 void sr25519_derive_keypair_soft(sr25519_keypair derived, const sr25519_keypair keypair, const sr25519_chain_code chain_code);
 #+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L77][example]]
 ** soft derive public key
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L100][example]]
 #+BEGIN_SRC C
 void sr25519_derive_public_soft(sr25519_public_key derived_public, const sr25519_public_key public, const sr25519_chain_code chain_code);
 #+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L100][example]]
 ** hard derive keypair
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L118][example]]
 #+BEGIN_SRC C
 void sr25519_derive_keypair_hard(sr25519_keypair derived, const sr25519_keypair keypair, const sr25519_chain_code chain_code);
 #+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L118][example]]
 ** random number generator
 #+BEGIN_SRC C
 void sr25519_randombytes(void *p, size_t len);
