@@ -38,6 +38,10 @@ Use -DSR25519_FORCE_32BIT to force the use of 32 bit routines even when compilin
 cmake .. -DSR25519_FORCE_32BIT=true
 #+END_SRC
 
+* Test
+#+BEGIN_SRC sh
+./sr25519DonnaTests
+#+END_SRC
 * Usage
 ** include
 #+BEGIN_SRC C
