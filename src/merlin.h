@@ -1,3 +1,7 @@
+/*
+This is based on the merlin lib from the author (hdevalence) https://github.com/hdevalence/libmerlin
+*/
+
 #ifndef MERLIN_H
 #define MERLIN_H
 #define __STDC_WANT_LIB_EXT1__ 1

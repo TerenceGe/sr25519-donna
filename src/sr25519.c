@@ -5,6 +5,7 @@
 #include "ristretto255.h"
 #include "merlin.h"
 #include "memzero.h"
+#include "vrf.h"
 
 void divide_scalar_bytes_by_cofactor(uint8_t *scalar, size_t scalar_len) {
     uint8_t low = 0;
@@ -39,6 +40,22 @@ void expand_ed25519(sr25519_secret_key_key key, sr25519_secret_key_nonce nonce, 
     key[31] &= 0b1111111;
     memcpy(nonce, hash + 32, 32);
     memzero(hash, sizeof(hash));
+}
+
+void expand_uniform(sr25519_secret_key_key key, sr25519_secret_key_nonce nonce, sr25519_mini_secret_key mini_secret_key) {
+    merlin_transcript t = {0};
+
+    merlin_transcript_init(&t, (uint8_t *)"ExpandSecretKeys", 16);
+    merlin_transcript_commit_bytes(&t, (uint8_t *)"mini", 4, mini_secret_key, 32);
+
+    bignum256modm scalar = {0};
+    uint8_t scalar_bytes[64] = {0};
+    merlin_transcript_challenge_bytes(&t, (uint8_t *)"sk", 2, scalar_bytes, 64);
+    expand256_modm(scalar, scalar_bytes, 64);
+    contract256_modm(key, scalar);
+    merlin_transcript_challenge_bytes(&t, (uint8_t *)"no", 2, nonce, 32);
+
+    memzero(&t, sizeof(t));
 }
 
 void hard_derive_mini_secret_key(sr25519_mini_secret_key key_out, sr25519_chain_code chain_code_out, const sr25519_mini_secret_key key_in, const sr25519_chain_code chain_code_in) {
@@ -133,6 +150,33 @@ void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secre
     memzero(secret_key_key, sizeof(secret_key_key));
     memzero(secret_key_nonce, sizeof(secret_key_nonce));
     memzero(public_key, sizeof(public_key));
+}
+
+void sr25519_uniform_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key mini_secret_key) {
+    sr25519_secret_key_key secret_key_key = {0};
+    sr25519_secret_key_nonce secret_key_nonce = {0};
+    expand_ed25519(secret_key_key, secret_key_nonce, mini_secret_key);
+    sr25519_public_key public_key = {0};
+    private_key_to_publuc_key(public_key, secret_key_key);
+
+    memcpy(keypair, secret_key_key, 32);
+    memcpy(keypair + 32, secret_key_nonce, 32);
+    memcpy(keypair + 64, public_key, 32);
+
+    memzero(secret_key_key, sizeof(secret_key_key));
+    memzero(secret_key_nonce, sizeof(secret_key_nonce));
+    memzero(public_key, sizeof(public_key));
+}
+
+void sr25519_keypair_ed25519_to_uniform(sr25519_keypair uniform_keypair, const sr25519_keypair ed25519_keypair) {
+    sr25519_secret_key_key secret_key_key = {0};
+    memcpy(secret_key_key, ed25519_keypair, 32);
+    divide_scalar_bytes_by_cofactor(secret_key_key, 32);
+
+    memcpy(uniform_keypair, secret_key_key, 32);
+    memcpy(uniform_keypair + 32, ed25519_keypair + 32, 64);
+
+    memzero(secret_key_key, sizeof(secret_key_key));
 }
 
 void sr25519_derive_keypair_hard(sr25519_keypair keypair_out, const sr25519_keypair keypair_in, const sr25519_chain_code chain_code_in) {
@@ -319,18 +363,18 @@ bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, u
     expand256_modm(k, buf, 64);
     expand_raw256_modm(s, signature_s);
 
-    /* int is_canonical = is_reduced256_modm(s); */
+    int is_canonical = is_reduced256_modm(s);
 
-    /* if (!is_canonical) { */
-    /*     memzero(&t, sizeof(t)); */
-    /*     memzero(signature_R, sizeof(signature_R)); */
-    /*     memzero(signature_s, sizeof(signature_s)); */
-    /*     memzero(k, sizeof(k)); */
-    /*     memzero(s, sizeof(s)); */
-    /*     memzero(buf, sizeof(buf)); */
+    if (!is_canonical) {
+        memzero(&t, sizeof(t));
+        memzero(signature_R, sizeof(signature_R));
+        memzero(signature_s, sizeof(signature_s));
+        memzero(k, sizeof(k));
+        memzero(s, sizeof(s));
+        memzero(buf, sizeof(buf));
 
-    /*     return false; */
-    /* } */
+        return false;
+    }
 
     ge25519 A = {0}, R = {0};
     ristretto_decode(&A, public);
@@ -353,4 +397,172 @@ bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, u
     memzero(R_compressed, sizeof(R_compressed));
 
     return valid;
+}
+
+void from_le_bytes(uint8_t *out, const uint8_t *in, size_t len) {
+    for (size_t i = 0; i < len; i++) {
+        out[len - 1 - i] = in[i];
+    }
+}
+
+VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, const sr25519_keypair keypair, const uint8_t *message, unsigned long message_length, const sr25519_vrf_threshold limit) {
+    merlin_transcript t = {0};
+    merlin_transcript_init(&t, (uint8_t *)"SigningContext", 14);
+    merlin_transcript_commit_bytes(&t, (uint8_t *)"", 0, (uint8_t *)"substrate", 9);
+    merlin_transcript_commit_bytes(&t, (uint8_t *)"sign-bytes", 10, message, message_length);
+
+    sr25519_vrf_io io = {0};
+    sr25519_vrf_proof proof = {0};
+    sr25519_vrf_proof_batchable proof_batchable = {0};
+    Sr25519SignatureResult sign_result = vrf_sign(io, proof, proof_batchable, keypair, &t);
+    if (sign_result != Ok) {
+        VrfResult vrf_result = {0};
+        vrf_result.result = sign_result;
+        vrf_result.is_less = false;
+
+        memzero(&t, sizeof(merlin_transcript));
+        memzero(io, 64);
+        memzero(proof, 64);
+        memzero(proof_batchable, 96);
+
+        return vrf_result;
+    }
+
+    sr25519_vrf_raw_output raw_output = {0};
+    io_make_bytes(raw_output, io, (uint8_t *)"substrate-babe-vrf", 18);
+
+    uint8_t raw_output_le[16] = {0};
+    from_le_bytes(raw_output_le, raw_output, 16);
+    uint8_t limit_le[16] = {0};
+    from_le_bytes(limit_le, limit, 16);
+
+    bool check = memcmp(raw_output_le, limit_le, 16) < 0;
+
+    memcpy(out_and_proof, io + 32, 32);
+    memcpy(out_and_proof + 32, proof, 64);
+
+    if (check) {
+        VrfResult vrf_result = {0};
+        vrf_result.result = Ok;
+        vrf_result.is_less = true;
+
+        memzero(&t, sizeof(merlin_transcript));
+        memzero(io, 64);
+        memzero(proof, 64);
+        memzero(proof_batchable, 96);
+        memzero(raw_output, 16);
+        memzero(raw_output_le, 16);
+        memzero(limit_le, 16);
+
+        return vrf_result;
+    } else {
+        VrfResult vrf_result = {0};
+        vrf_result.result = Ok;
+        vrf_result.is_less = false;
+
+        memzero(&t, sizeof(merlin_transcript));
+        memzero(io, 64);
+        memzero(proof, 64);
+        memzero(proof_batchable, 96);
+        memzero(raw_output, 16);
+        memzero(raw_output_le, 16);
+        memzero(limit_le, 16);
+
+        return vrf_result;
+    }
+}
+
+VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *message, unsigned long message_length, const sr25519_vrf_output output, const sr25519_vrf_proof proof, const sr25519_vrf_threshold threshold) {
+    merlin_transcript t1 = {0};
+    merlin_transcript_init(&t1, (uint8_t *)"SigningContext", 14);
+    merlin_transcript_commit_bytes(&t1, (uint8_t *)"", 0, (uint8_t *)"substrate", 9);
+    merlin_transcript_commit_bytes(&t1, (uint8_t *)"sign-bytes", 10, message, message_length);
+
+    sr25519_vrf_io inout = {0};
+    sr25519_vrf_proof_batchable proof_batchable = {0};
+    Sr25519SignatureResult verify_result = vrf_verify(inout, proof_batchable, public, &t1, output, proof);
+
+    if (verify_result != Ok) {
+        VrfResult vrf_result = {0};
+        vrf_result.result = verify_result;
+        vrf_result.is_less = false;
+
+        memzero(&t1, sizeof(merlin_transcript));
+        memzero(inout, 64);
+        memzero(proof_batchable, 96);
+
+        return vrf_result;
+    }
+
+    sr25519_vrf_raw_output raw_output = {0};
+    io_make_bytes(raw_output, inout, (uint8_t *)"substrate-babe-vrf", 18);
+
+    uint8_t raw_output_le[16] = {0};
+    from_le_bytes(raw_output_le, raw_output, 16);
+    uint8_t threshold_le[16] = {0};
+    from_le_bytes(threshold_le, threshold, 16);
+
+    bool check = memcmp(raw_output_le, threshold_le, 16) < 0;
+
+    sr25519_vrf_output verify_output = {0};
+    memcpy(verify_output, inout + 32, 32);
+
+    merlin_transcript t2 = {0};
+    merlin_transcript_init(&t2, (uint8_t *)"SigningContext", 14);
+    merlin_transcript_commit_bytes(&t2, (uint8_t *)"", 0, (uint8_t *)"substrate", 9);
+    merlin_transcript_commit_bytes(&t2, (uint8_t *)"sign-bytes", 10, message, message_length);
+    sr25519_vrf_proof decomp_proof = {0};
+    Sr25519SignatureResult shorten_result = shorten_vrf(decomp_proof, proof_batchable, public, &t2, verify_output);
+
+    if (shorten_result != Ok) {
+        VrfResult vrf_result = {0};
+        vrf_result.result = shorten_result;
+        vrf_result.is_less = false;
+
+        memzero(&t1, sizeof(merlin_transcript));
+        memzero(&t2, sizeof(merlin_transcript));
+        memzero(inout, 64);
+        memzero(proof_batchable, 96);
+        memzero(raw_output, 16);
+        memzero(raw_output_le, 16);
+        memzero(threshold_le, 16);
+        memzero(verify_output, 32);
+        memzero(decomp_proof, 64);
+
+        return vrf_result;
+    }
+
+    if (memcmp(output, verify_output, 32) == 0 && memcmp(proof, decomp_proof, 32) == 0) {
+        VrfResult vrf_result = {0};
+        vrf_result.result = Ok;
+        vrf_result.is_less = check;
+
+        memzero(&t1, sizeof(merlin_transcript));
+        memzero(&t2, sizeof(merlin_transcript));
+        memzero(inout, 64);
+        memzero(proof_batchable, 96);
+        memzero(raw_output, 16);
+        memzero(raw_output_le, 16);
+        memzero(threshold_le, 16);
+        memzero(verify_output, 32);
+        memzero(decomp_proof, 64);
+
+        return vrf_result;
+    } else {
+        VrfResult vrf_result = {0};
+        vrf_result.result = EquationFalse;
+        vrf_result.is_less = false;
+
+        memzero(&t1, sizeof(merlin_transcript));
+        memzero(&t2, sizeof(merlin_transcript));
+        memzero(inout, 64);
+        memzero(proof_batchable, 96);
+        memzero(raw_output, 16);
+        memzero(raw_output_le, 16);
+        memzero(threshold_le, 16);
+        memzero(verify_output, 32);
+        memzero(decomp_proof, 64);
+
+        return vrf_result;
+    }
 }
