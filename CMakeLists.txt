@@ -72,6 +72,9 @@ set(SOURCE_FILES
 
   src/sr25519-hash-custom.h
   src/sr25519-hash.h
+
+  src/vrf.h
+  src/vrf.c
   )
 
 set(INCLUDE_FILES

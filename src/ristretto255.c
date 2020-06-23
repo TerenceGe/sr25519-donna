@@ -1,62 +1,84 @@
 #include "ristretto255.h"
 #include "memzero.h"
 
-/**
- * Edwards `d` value from the curve equation, equal to `-121665/121666 (mod p)`.
- */
 #if defined(ED25519_64BIT)
-const bignum25519 EDWARDS_D = {
-    929955233495203,
-    466365720129213,
-    1662059464998953,
-    2033849074728123,
-    1442794654840575,
+const bignum25519 one = {0x01, 0x00, 0x00, 0x00, 0x00};
+const bignum25519 zero = {0, 0, 0, 0, 0};
+const bignum25519 MINUS_ONE = {
+    2251799813685228,
+    2251799813685247,
+    2251799813685247,
+    2251799813685247,
+    2251799813685247
 };
-#else
-const bignum25519 EDWARDS_D = {
-    56195235, 13857412, 51736253,  6949390,   114729,
-    24766616, 60832955, 30306712, 48412415, 21499315,
-};
-#endif
-
-/**
- * Precomputed value of one of the square roots of -1 (mod p)
- */
-#if defined(ED25519_64BIT)
 const bignum25519 SQRT_M1 = {
     1718705420411056,
     234908883556509,
     2233514472574048,
     2117202627021982,
-    765476049583133,
+    765476049583133
 };
-#else
-const bignum25519 SQRT_M1 = {
-    34513072, 25610706,  9377949, 3500415, 12389472,
-    33281959, 41962654, 31548777,  326685, 11406482,
+const bignum25519 EDWARDS_D = {
+    929955233495203,
+    466365720129213,
+    1662059464998953,
+    2033849074728123,
+    1442794654840575
 };
-#endif
-
-#if defined(ED25519_64BIT)
-const bignum25519 one = {0x01, 0x00, 0x00, 0x00, 0x00};
-const bignum25519 zero = {0, 0, 0, 0, 0};
-#else
-const bignum25519 one = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-const bignum25519 zero = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-#endif
-
-#if defined(ED25519_64BIT)
 const bignum25519 INVSQRT_A_MINUS_D = {
   278908739862762,
   821645201101625,
   8113234426968,
   1777959178193151,
-  2118520810568447,
+  2118520810568447
+};
+const bignum25519 EDWARDS_D_MINUS_ONE_SQUARED = {
+    1507062230895904,
+    1572317787530805,
+    683053064812840,
+    317374165784489,
+    1572899562415810
+};
+const bignum25519 ONE_MINUS_EDWARDS_D_SQUARED = {
+    1136626929484150,
+    1998550399581263,
+    496427632559748,
+    118527312129759,
+    45110755273534
+};
+const bignum25519 SQRT_AD_MINUS_ONE = {
+    2241493124984347,
+    425987919032274,
+    2207028919301688,
+    1220490630685848,
+    974799131293748
 };
 #else
+const bignum25519 one = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+const bignum25519 zero = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const bignum25519 MINUS_ONE = {
+    67108844, 33554431, 67108863, 33554431, 67108863, 33554431, 67108863, 33554431, 67108863, 33554431
+};
+const bignum25519 SQRT_M1 = {
+    34513072, 25610706,  9377949, 3500415, 12389472,
+    33281959, 41962654, 31548777,  326685, 11406482
+};
+const bignum25519 EDWARDS_D = {
+    56195235, 13857412, 51736253,  6949390,   114729,
+    24766616, 60832955, 30306712, 48412415, 21499315
+};
 const bignum25519 INVSQRT_A_MINUS_D = {
   6111466,  4156064, 39310137, 12243467, 41204824,
-  120896, 20826367, 26493656,  6093567, 31568420,
+  120896, 20826367, 26493656,  6093567, 31568420
+};
+const bignum25519 EDWARDS_D_MINUS_ONE_SQUARED = {
+  15551776, 22456977, 53683765, 23429360, 55212328, 10178283, 40474537, 4729243, 61826754, 23438029
+};
+const bignum25519 ONE_MINUS_EDWARDS_D_SQUARED = {
+  6275446, 16937061, 44170319, 29780721, 11667076, 7397348, 39186143, 1766194, 42675006, 672202
+};
+const bignum25519 SQRT_AD_MINUS_ONE = {
+  24849947, 33400850, 43495378, 6347714, 46036536, 32887293, 41837720, 18186727, 66238516, 14525638
 };
 #endif
 
@@ -222,8 +244,6 @@ int ristretto_decode(ge25519 *element, const unsigned char bytes[32]) {
     s_is_negative = bignum25519_is_negative(s_bytes_check);
 
     // Bail out if the field element encoding was non-canonical or negative
-    /* printf("s_encoding_is_canonical: %i\n", s_encoding_is_canonical); */
-    /* printf("s_is_negative: %i\n", s_is_negative); */
     if (s_encoding_is_canonical == 0 || s_is_negative == 1) {
         memzero(s, sizeof(s));
         memzero(ss, sizeof(ss));
@@ -254,8 +274,6 @@ int ristretto_decode(ge25519 *element, const unsigned char bytes[32]) {
     curve25519_add_reduce(u2, one, ss);    //  1 - as²
     curve25519_square(u1_sqr, u1);         // (1 + as²)²
     curve25519_square(u2_sqr, u2);         // (1 - as²)²
-    /* printf("u2_sqr: "); */
-    /* print_bignum25519(u2_sqr); */
     curve25519_neg(minus_d, EDWARDS_D);    // -d               // XXX store as const?
     curve25519_mul(tmp, minus_d, u1_sqr);  // ad(1+as²)²
     curve25519_sub_reduce(v, tmp, u2_sqr); // ad(1+as²)² - (1-as²)²
@@ -421,27 +439,18 @@ void ristretto_encode(unsigned char bytes[32], const ge25519 element) {
 }
 
 /**
- * Produce a Ristretto group element from a 512-bit hash digest.
- *
- * Returns 1 on success, otherwise returns 0.
- */
-int ristretto_from_uniform_bytes(ristretto_point_t *element, const unsigned char bytes[64]) {
-    return 1;
-}
-
-/**
  * Test equality of two `ristretto_point_t`s in constant time.
  *
  * Returns 1 if the two points are equal, and 0 otherwise.
  */
-int ristretto_ct_eq(const ristretto_point_t *a, const ristretto_point_t *b) {
+int ristretto_ct_eq(const ge25519 *a, const ge25519 *b) {
     bignum25519 x1y2 = {0}, y1x2 = {0}, x1x2 = {0}, y1y2 = {0};
     uint8_t check_one, check_two;
 
-    curve25519_mul(x1y2, a->point.x, b->point.y);
-    curve25519_mul(y1x2, a->point.y, b->point.x);
-    curve25519_mul(x1x2, a->point.x, b->point.x);
-    curve25519_mul(y1y2, a->point.y, b->point.y);
+    curve25519_mul(x1y2, a->x, b->y);
+    curve25519_mul(y1x2, a->y, b->x);
+    curve25519_mul(x1x2, a->x, b->x);
+    curve25519_mul(y1y2, a->y, b->y);
 
     check_one = bignum25519_ct_eq(x1y2, y1x2);
     check_two = bignum25519_ct_eq(x1x2, y1y2);
@@ -452,4 +461,190 @@ int ristretto_ct_eq(const ristretto_point_t *a, const ristretto_point_t *b) {
     memzero(y1y2, sizeof(y1y2));
 
     return check_one | check_two;
+}
+
+void elligator_ristretto_flavor(ge25519 *P, const bignum25519 r0) {
+    bignum25519 r = {0}, r02 = {0}, rOne = {0}, Ns = {0}, d_mul_r = {0}, c_min_d_mul_r = {0}, r_add_d = {0}, D = {0}, s = {0}, s_prime = {0}, s_prime_neg = {0}, c = {0}, r_min_one = {0}, c_mul_r_min_one = {0}, c_mul_r_min_one_mul_d = {0}, Nt = {0}, s2 = {0}, s_add_s = {0}, x = {0}, y = {0}, z = {0}, t = {0}, px = {0}, py = {0}, pz = {0}, pt = {0};
+
+    curve25519_copy(c, MINUS_ONE);
+    curve25519_square(r02, r0);
+    curve25519_mul(r, r02, SQRT_M1);
+    curve25519_add_reduce(rOne, r, one);
+    curve25519_mul(Ns, rOne, ONE_MINUS_EDWARDS_D_SQUARED);
+    curve25519_mul(d_mul_r, EDWARDS_D, r);
+    curve25519_sub_reduce(c_min_d_mul_r, c, d_mul_r);
+    curve25519_add_reduce(r_add_d, r, EDWARDS_D);
+    curve25519_mul(D, c_min_d_mul_r, r_add_d);
+    uint8_t Ns_D_is_sq = curve25519_sqrt_ratio_i(s, Ns, D);
+    curve25519_mul(s_prime, s, r0);
+    int8_t s_prime_is_pos = !bignum25519_is_negative(s_prime);
+    curve25519_neg(s_prime_neg, s_prime);
+    curve25519_swap_conditional(s_prime, s_prime_neg, s_prime_is_pos);
+    curve25519_swap_conditional(s, s_prime, !Ns_D_is_sq);
+    curve25519_move_conditional_bytes(c, r, !Ns_D_is_sq);
+    curve25519_sub_reduce(r_min_one, r, one);
+    curve25519_mul(c_mul_r_min_one, c, r_min_one);
+    curve25519_mul(c_mul_r_min_one_mul_d, c_mul_r_min_one, EDWARDS_D_MINUS_ONE_SQUARED);
+    curve25519_sub_reduce(Nt, c_mul_r_min_one_mul_d, D);
+    curve25519_square(s2, s);
+
+    curve25519_add_reduce(s_add_s, s, s);
+
+    curve25519_mul(x, s_add_s, D);
+    curve25519_sub_reduce(y, one, s2);
+    curve25519_mul(z, Nt, SQRT_AD_MINUS_ONE);
+    curve25519_add_reduce(t, one, s2);
+
+    curve25519_mul(px, x, t);
+    curve25519_mul(py, y, z);
+    curve25519_mul(pz, z, t);
+    curve25519_mul(pt, x, y);
+
+    curve25519_copy(P->x, px);
+    curve25519_copy(P->y, py);
+    curve25519_copy(P->z, pz);
+    curve25519_copy(P->t, pt);
+
+    memzero(r, sizeof(r));
+    memzero(r02, sizeof(r02));
+    memzero(rOne, sizeof(rOne));
+    memzero(Ns, sizeof(Ns));
+    memzero(d_mul_r, sizeof(d_mul_r));
+    memzero(c_min_d_mul_r, sizeof(c_min_d_mul_r));
+    memzero(r_add_d, sizeof(r_add_d));
+    memzero(D, sizeof(D));
+    memzero(s, sizeof(s));
+    memzero(s_prime, sizeof(s_prime));
+    memzero(s_prime_neg, sizeof(s_prime_neg));
+    memzero(c, sizeof(c));
+    memzero(r_min_one, sizeof(r_min_one));
+    memzero(c_mul_r_min_one, sizeof(c_mul_r_min_one));
+    memzero(c_mul_r_min_one_mul_d, sizeof(c_mul_r_min_one_mul_d));
+    memzero(Nt, sizeof(Nt));
+    memzero(s2, sizeof(s2));
+    memzero(s_add_s, sizeof(s_add_s));
+    memzero(x, sizeof(x));
+    memzero(y, sizeof(y));
+    memzero(z, sizeof(z));
+    memzero(t, sizeof(t));
+    memzero(px, sizeof(px));
+    memzero(py, sizeof(py));
+    memzero(pz, sizeof(pz));
+    memzero(pt, sizeof(pt));
+}
+
+void ristretto_from_uniform_bytes(ge25519 *element, const unsigned char bytes[64]) {
+    uint8_t r_1_bytes[32] = {0};
+    memcpy(r_1_bytes, bytes, 32);
+    bignum25519 r_1 = {0};
+    curve25519_expand(r_1, r_1_bytes);
+    ge25519 R_1 = {0};
+    elligator_ristretto_flavor(&R_1, r_1);
+
+    uint8_t r_2_bytes[32] = {0};
+    memcpy(r_2_bytes, bytes + 32, 32);
+    bignum25519 r_2 = {0};
+    curve25519_expand(r_2, r_2_bytes);
+    ge25519 R_2 = {0};
+    elligator_ristretto_flavor(&R_2, r_2);
+
+    ge25519_add(element, &R_1, &R_2);
+
+    memzero(r_1_bytes, sizeof(r_1_bytes));
+    memzero(r_2_bytes, sizeof(r_2_bytes));
+    memzero(r_1, sizeof(r_1));
+    memzero(r_1, sizeof(r_1));
+    memzero(&R_1, sizeof(R_1));
+    memzero(&R_2, sizeof(R_2));
+}
+
+/*
+    scalarmults
+*/
+
+void ge25519_set_neutral(ge25519 *r)
+{
+    memzero(r, sizeof(ge25519));
+    r->y[0] = 1;
+    r->z[0] = 1;
+}
+
+static void ge25519_cmove_stride4b(long * r, long * p, long * pos, long * n, int stride) {
+  long x0=p[0], x1=p[1], x2=p[2], x3=p[3], y0 = 0, y1 = 0, y2 = 0, y3 = 0;
+  for(p+=stride; p<n; p+=stride) {
+    volatile int flag=(p==pos);
+    y0 = p[0];
+    y1 = p[1];
+    y2 = p[2];
+    y3 = p[3];
+    x0 = flag ? y0 : x0;
+    x1 = flag ? y1 : x1;
+    x2 = flag ? y2 : x2;
+    x3 = flag ? y3 : x3;
+  }
+  r[0] = x0;
+  r[1] = x1;
+  r[2] = x2;
+  r[3] = x3;
+}
+#define HAS_CMOVE_STRIDE4B
+
+void ge25519_move_conditional_pniels_array(ge25519_pniels * r, const ge25519_pniels * p, int pos, int n) {
+#ifdef HAS_CMOVE_STRIDE4B
+  size_t i = 0;
+  for(i=0; i<sizeof(ge25519_pniels)/sizeof(long); i+=4) {
+    ge25519_cmove_stride4b(((long*)r)+i,
+               ((long*)p)+i,
+               ((long*)(p+pos))+i,
+               ((long*)(p+n))+i,
+               sizeof(ge25519_pniels)/sizeof(long));
+  }
+#else
+  size_t i = 0;
+  for(i=0; i<n; i++) {
+    ge25519_move_conditional_pniels(r, p+i, pos==i);
+  }
+#endif
+}
+
+/* computes [s1]p1, constant time */
+void ge25519_scalarmult(ge25519 *r, const ge25519 *p1, const bignum256modm s1) {
+    signed char slide1[64] = {0};
+    ge25519_pniels pre1[9] = {0};
+    ge25519_pniels pre = {0};
+    ge25519 d1 = {0};
+    ge25519_p1p1 t = {0};
+    int32_t i = 0;
+
+    contract256_window4_modm(slide1, s1);
+
+    ge25519_full_to_pniels(pre1+1, p1);
+    ge25519_double(&d1, p1);
+
+    ge25519_set_neutral(r);
+    ge25519_full_to_pniels(pre1, r);
+
+    ge25519_full_to_pniels(pre1+2, &d1);
+    for (i = 1; i < 7; i++) {
+        ge25519_pnielsadd(&pre1[i+2], &d1, &pre1[i]);
+    }
+
+    for (i = 63; i >= 0; i--) {
+        int k=abs(slide1[i]);
+        ge25519_double_partial(r, r);
+        ge25519_double_partial(r, r);
+        ge25519_double_partial(r, r);
+        ge25519_double_p1p1(&t, r);
+        ge25519_move_conditional_pniels_array(&pre, pre1, k, 9);
+        ge25519_p1p1_to_full(r, &t);
+        ge25519_pnielsadd_p1p1(&t, r, &pre, (unsigned char)slide1[i] >> 7);
+        ge25519_p1p1_to_partial(r, &t);
+    }
+    curve25519_mul(r->t, t.x, t.y);
+
+    memzero(slide1, sizeof(slide1));
+    memzero(&pre1, sizeof(pre1));
+    memzero(&pre, sizeof(pre));
+    memzero(&d1, sizeof(d1));
+    memzero(&t, sizeof(t));
 }

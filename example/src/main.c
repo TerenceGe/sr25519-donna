@@ -6,6 +6,8 @@
 
 #define FROMHEX_MAXLEN 512
 
+char *result_map[8] = {"Ok", "EquationFalse", "PointDecompressionError", "ScalarFormatError", "BytesLengthError", "NotMarkedSchnorrkel", "MuSigAbsent", "MuSigInconsistent"};
+
 const uint8_t *fromhex(const char *str) {
   static uint8_t buf[FROMHEX_MAXLEN];
   size_t len = strlen(str) / 2;
@@ -137,13 +139,109 @@ void hard_derives_pair() {
     print_hash(expected, 32);
 }
 
+void vrf_verify() {
+    printf("test vrf verify: \n");
+
+    sr25519_mini_secret_key seed = {0};
+    sr25519_randombytes(seed, 32);
+
+    sr25519_keypair keypair = {0};
+    sr25519_uniform_keypair_from_seed(keypair, seed);
+    sr25519_public_key public = {0};
+    memcpy(public, keypair + 64, 32);
+
+    sr25519_vrf_threshold limit = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    sr25519_vrf_out_and_proof out_and_proof  = {0};
+    VrfResult res1 = sr25519_vrf_sign_if_less(out_and_proof, keypair, (uint8_t *)"Hello, world!", 13, limit);
+
+    printf("result1 result: %s\n", (char *)result_map[res1.result]);
+    printf("result1 is less: %i\n", res1.is_less);
+
+    sr25519_vrf_output output = {0};
+    memcpy(output, out_and_proof, 32);
+    printf("vrf output: ");
+    print_hash(output, 32);
+    sr25519_vrf_proof proof = {0};
+    memcpy(proof, out_and_proof + 32, 64);
+    printf("vrf proof: ");
+    print_hash(proof, 64);
+
+    VrfResult res2 = sr25519_vrf_verify(public, (uint8_t *)"Hello, world!", 13, output, proof, limit);
+
+    printf("result2 result: %s\n", (char *)result_map[res2.result]);
+    printf("result2 is less: %i\n", res2.is_less);
+
+    output[5] += 3;
+    VrfResult res3 = sr25519_vrf_verify(public, (uint8_t *)"Hello, world!", 13, output, proof, limit);
+
+    printf("result3 result: %s\n", (char *)result_map[res3.result]);
+    printf("result3 is less: %i\n", res3.is_less);
+}
+
+void vrf_result_not_less() {
+    printf("test vrf result not less: \n");
+
+    sr25519_keypair keypair = {0};
+    memcpy(keypair, fromhex("915bb406968655c3412df5773c3de3dee9f6da84668b5de8d2f34d0304d20b0bac5ea3a293dfd93859ee64a5b825937753864c19be857f045758dcae10259ba1049b21bb9cb88471b9dadb50b925135cfb291a463043635b58599a2d01b1fd18"), 96);
+    sr25519_vrf_out_and_proof out_and_proof  = {0};
+    sr25519_vrf_threshold limit = {0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55};
+
+    VrfResult res1 = sr25519_vrf_sign_if_less(out_and_proof, keypair, (uint8_t *)"Hello, world!", 13, limit);
+
+    sr25519_vrf_output output = {0};
+    memcpy(output, out_and_proof, 32);
+    printf("vrf output: ");
+    print_hash(output, 32);
+    sr25519_vrf_proof proof = {0};
+    memcpy(proof, out_and_proof + 32, 64);
+    printf("vrf proof: ");
+    print_hash(proof, 64);
+
+    printf("result1 result: %s\n", (char *)result_map[res1.result]);
+    printf("result1 is less: %i\n", res1.is_less);
+}
+
+void vrf_sign_and_check() {
+    printf("test vrf sign and check: \n");
+
+    sr25519_keypair keypair = {0};
+    memcpy(keypair, fromhex("915bb406968655c3412df5773c3de3dee9f6da84668b5de8d2f34d0304d20b0bac5ea3a293dfd93859ee64a5b825937753864c19be857f045758dcae10259ba1049b21bb9cb88471b9dadb50b925135cfb291a463043635b58599a2d01b1fd18"), 96);
+    sr25519_vrf_out_and_proof out_and_proof  = {0};
+    sr25519_vrf_threshold limit = {0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
+
+    VrfResult res1 = sr25519_vrf_sign_if_less(out_and_proof, keypair, (uint8_t *)"Hello, world!", 13, limit);
+
+    sr25519_vrf_output output = {0};
+    memcpy(output, out_and_proof, 32);
+    printf("vrf output: ");
+    print_hash(output, 32);
+    sr25519_vrf_proof proof = {0};
+    memcpy(proof, out_and_proof + 32, 64);
+    printf("vrf proof: ");
+    print_hash(proof, 64);
+
+    printf("result1 result: %s\n", (char *)result_map[res1.result]);
+    printf("result1 is less: %i\n", res1.is_less);
+}
+
 int main(int argc, char *argv[]) {
     creates_pair_from_known_seed();
+    printf("\n");
     can_sign_and_verify_message();
+    printf("\n");
     can_verify_known_message();
+    printf("\n");
     soft_derives_pair();
+    printf("\n");
     soft_derives_public();
+    printf("\n");
     hard_derives_pair();
+    printf("\n");
+    vrf_verify();
+    printf("\n");
+    vrf_result_not_less();
+    printf("\n");
+    vrf_sign_and_check();
 
     return 0;
 }
