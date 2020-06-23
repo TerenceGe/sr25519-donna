@@ -147,6 +147,12 @@ void vrf_verify() {
 
     sr25519_keypair keypair = {0};
     sr25519_uniform_keypair_from_seed(keypair, seed);
+
+    // sr25519_keypair ed25519_keypair = {0};
+    // sr25519_keypair_from_seed(ed25519_keypair, seed);
+    // sr25519_keypair keypair = {0};
+    // sr25519_keypair_ed25519_to_uniform(keypair, ed25519_keypair);
+
     sr25519_public_key public = {0};
     memcpy(public, keypair + 64, 32);
 
