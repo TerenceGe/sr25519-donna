@@ -103,7 +103,31 @@ typedef uint8_t sr25519_chain_code[32];
 typedef uint8_t sr25519_public_key[32];
 typedef uint8_t sr25519_keypair[96];
 typedef uint8_t sr25519_signature[64];
+typedef uint8_t sr25519_vrf_output[32];
+typedef uint8_t sr25519_vrf_io[64];
+typedef uint8_t sr25519_vrf_proof[64];
+typedef uint8_t sr25519_vrf_out_and_proof[96];
+typedef uint8_t sr25519_vrf_proof_batchable[96];
+typedef uint8_t sr25519_vrf_raw_output[16];
+typedef uint8_t sr25519_vrf_threshold[16];
 #+END_SRC
+** vrf sign
+#+BEGIN_SRC C
+VrfResult sr25519_vrf_sign_if_less(uint8_t *out_and_proof, const sr25519_keypair keypair, const uint8_t *message, unsigned long message_length, const uint8_t *limit);
+#+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/dc22624e80ce1c8fb4df0936678f6edcd8021dfd/example/src/main.c#L155][example]]
+** vrf verify
+#+BEGIN_SRC C
+VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *message, unsigned long message_length, const uint8_t *output, const uint8_t *proof, const uint8_t *threshold);
+#+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/dc22624e80ce1c8fb4df0936678f6edcd8021dfd/example/src/main.c#L169][example]]
+** vrf keypair
+By default, the sr25519_keypair_from_seed functon creates keypair that contains half ed25519 bytes (which is compatible with the wasm crypto lib), vrf requires the keypair is uniform. In this case, you can use sr25519_uniform_keypair_from_seed for keypair creating or sr25519_keypair_ed25519_to_uniform for converting.
+#+BEGIN_SRC C
+void sr25519_uniform_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key seed);
+void sr25519_keypair_ed25519_to_uniform(sr25519_keypair uniform_keypair, const sr25519_keypair ed25519_keypair);
+#+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/7dd704c0530e7aad50c7ec8e6069725f6124645a/example/src/main.c#L148][example]]
 * Author
 [[https://github.com/TerenceGe][Terence Ge]]
 * License
