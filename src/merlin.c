@@ -216,7 +216,6 @@ void merlin_transcript_init(merlin_transcript* mctx, const uint8_t* label, size_
 }
 
 void merlin_transcript_commit_bytes(merlin_transcript* mctx, const uint8_t* label, size_t label_len, const uint8_t* message, size_t message_len) {
-    /* XXX hack */
     uint64_t message_len_bytes = message_len;
     strobe128_meta_ad(&mctx->sctx, label, label_len, 0);
     strobe128_meta_ad(&mctx->sctx, (uint8_t*)&message_len_bytes, 4, 1);
@@ -224,7 +223,6 @@ void merlin_transcript_commit_bytes(merlin_transcript* mctx, const uint8_t* labe
 }
 
 void merlin_transcript_challenge_bytes(merlin_transcript* mctx, const uint8_t* label, size_t label_len, uint8_t* buffer, size_t buffer_len) {
-    /* XXX hack */
     uint64_t buffer_len_bytes = buffer_len;
     strobe128_meta_ad(&mctx->sctx, label, label_len, 0);
     strobe128_meta_ad(&mctx->sctx, (uint8_t*)&buffer_len_bytes, 4, 1);
@@ -252,7 +250,6 @@ void merlin_rng_init(merlin_rng* mrng, const merlin_transcript* mctx) {
 
 void merlin_rng_commit_witness_bytes(merlin_rng* mrng, const uint8_t* label, size_t label_len, const uint8_t* witness, size_t witness_len) {
     assert(!mrng->finalized);
-    /* XXX hack */
     uint64_t witness_len_bytes = witness_len;
     strobe128_meta_ad(&mrng->sctx, label, label_len, 0);
     strobe128_meta_ad(&mrng->sctx, (uint8_t*)&witness_len_bytes, 4, 1);
@@ -268,7 +265,6 @@ void merlin_rng_finalize(merlin_rng* mrng, const uint8_t entropy[32]) {
 
 void merlin_rng_random_bytes(merlin_rng* mrng, uint8_t* buffer, size_t buffer_len) {
     assert(mrng->finalized);
-    /* XXX hack */
     uint64_t buffer_len_bytes = buffer_len;
     strobe128_meta_ad(&mrng->sctx, (uint8_t*)&buffer_len_bytes, 4, 0);
     strobe128_prf(&mrng->sctx, buffer, buffer_len, 0);
