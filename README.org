@@ -1,7 +1,9 @@
 #+title: sr25519-donna
 
 This is a pure C implementation of polkadot's key derivation and signing algorithm [[https://wiki.polkadot.network/docs/en/learn-cryptography][schnorrkel]]. The goal is to fully compatible with the original [[https://github.com/w3f/schnorrkel][rust version]]. The curve operations are based on [[https://github.com/floodyberry/ed25519-donna][ed25519-donna]].
-[[https://raw.githubusercontent.com/w3f/Open-Grants-Program/master/src/web3%20foundation%20grants_black.jpg][W3F Grant]]
+
+[[file:https://raw.githubusercontent.com/w3f/Open-Grants-Program/master/src/web3%20foundation%20grants_black.jpg]]
+
 * Compilation
 ** Default Options
 #+BEGIN_SRC sh
