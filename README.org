@@ -112,7 +112,7 @@ typedef uint8_t sr25519_vrf_threshold[16];
 #+END_SRC
 ** vrf sign
 #+BEGIN_SRC C
-VrfResult sr25519_vrf_sign_if_less(uint8_t *out_and_proof, const sr25519_keypair keypair, const uint8_t *message, unsigned long message_length, const uint8_t *limit);
+VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, const sr25519_keypair keypair, const uint8_t *message, unsigned long message_length, const uint8_t *limit);
 #+END_SRC
 [[https://github.com/TerenceGe/sr25519-donna/blob/dc22624e80ce1c8fb4df0936678f6edcd8021dfd/example/src/main.c#L155][example]]
 ** vrf verify
