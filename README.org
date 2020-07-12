@@ -58,40 +58,6 @@ target_link_libraries(yourApp libsr25519_donna.dylib) # replace it with libsr255
 #+BEGIN_SRC C
     #include "sr25519-donna.h"
 #+END_SRC
-** create keypair from seed
-#+BEGIN_SRC C
-void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key seed);
-#+END_SRC
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L27][example]]
-** sign message
-#+BEGIN_SRC C
-void sr25519_sign(sr25519_signature signature, const sr25519_public_key public, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length);
-#+END_SRC
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L45][example]]
-** verify message
-#+BEGIN_SRC C
-bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public);
-#+END_SRC
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L64][example]]
-** soft derive keypair
-#+BEGIN_SRC C
-void sr25519_derive_keypair_soft(sr25519_keypair derived, const sr25519_keypair keypair, const sr25519_chain_code chain_code);
-#+END_SRC
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L77][example]]
-** soft derive public key
-#+BEGIN_SRC C
-void sr25519_derive_public_soft(sr25519_public_key derived_public, const sr25519_public_key public, const sr25519_chain_code chain_code);
-#+END_SRC
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L100][example]]
-** hard derive keypair
-#+BEGIN_SRC C
-void sr25519_derive_keypair_hard(sr25519_keypair derived, const sr25519_keypair keypair, const sr25519_chain_code chain_code);
-#+END_SRC
-[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L118][example]]
-** random number generator
-#+BEGIN_SRC C
-void sr25519_randombytes(void *p, size_t len);
-#+END_SRC
 ** sr25519 types
 #+BEGIN_SRC C
 typedef uint8_t sr25519_mini_secret_key[32];
@@ -110,20 +76,118 @@ typedef uint8_t sr25519_vrf_proof_batchable[96];
 typedef uint8_t sr25519_vrf_raw_output[16];
 typedef uint8_t sr25519_vrf_threshold[16];
 #+END_SRC
+** create keypair from seed
+| param   | description                                          |
+| keypair | the output ed25519 compatible keypair, 96 bytes long |
+| seed    | the input mini secret key, 32 bytes long             |
+#+BEGIN_SRC C
+void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key seed);
+#+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L27][example]]
+** sign message
+| param                      | description                                                      |
+| signature                  | the signature ouput, 64 bytes long                               |
+| public                     | the public key of the keypair to sign the message, 32 bytes long |
+| message and message_length | message arrary and length                                        |
+#+BEGIN_SRC C
+void sr25519_sign(sr25519_signature signature, const sr25519_public_key public, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length);
+#+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L45][example]]
+** verify message
+| param                      | description                                                          |
+| signature                  | the signature bytes to verify, 64 bytes long                         |
+| message and message_length | message arrary and length                                            |
+| public                     | the corresponding public key that signing the message, 32 bytes long |
+#+BEGIN_SRC C
+bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public);
+#+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L64][example]]
+** soft derive keypair
+| param      | description                         |
+| derived    | the derived keypair, 96 bytes long  |
+| keypair    | the input keypair, 96 bytes long    |
+| chain_code | the input chain code, 32 bytes long |
+#+BEGIN_SRC C
+void sr25519_derive_keypair_soft(sr25519_keypair derived, const sr25519_keypair keypair, const sr25519_chain_code chain_code);
+#+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L77][example]]
+** soft derive public key
+| param          | description                           |
+| derived_public | the derived public key, 32 bytes long |
+| public         | the input public key, 32 bytes long   |
+| chain_code     | the input chain code, 32 bytes long   |
+#+BEGIN_SRC C
+void sr25519_derive_public_soft(sr25519_public_key derived_public, const sr25519_public_key public, const sr25519_chain_code chain_code);
+#+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L100][example]]
+** hard derive keypair
+| param      | description                         |
+| derived    | the derived keypair, 96 bytes long  |
+| keypair    | the input keypair, 96 bytes long    |
+| chain_code | the input chain code, 32 bytes long |
+#+BEGIN_SRC C
+void sr25519_derive_keypair_hard(sr25519_keypair derived, const sr25519_keypair keypair, const sr25519_chain_code chain_code);
+#+END_SRC
+[[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L118][example]]
+** random number generator
+#+BEGIN_SRC C
+void sr25519_randombytes(void *p, size_t len);
+#+END_SRC
 ** vrf sign
+| param                      | description                                                                                                                                                                                   |
+| out_and_proof              | output combination of vrf output (32 bytes long) and vrf proof (64 bytes long)                                                                                                                |
+| keypair                    | keypair for signing, it should be an uniform keypair instead of ed25519 compatible, you can generated by sr25519_uniform_keypair_from_seed or converted by sr25519_keypair_ed25519_to_uniform |
+| message and message_length | message arrary and length                                                                                                                                                                     |
+| threshold                  | the vrf threshold, 16 bytes long, if the raw output bytes is less than threshold, the is_less field of result strcut will be true                                                             |
 #+BEGIN_SRC C
 VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, const sr25519_keypair keypair, const uint8_t *message, unsigned long message_length, const sr25519_vrf_threshold limit);
 #+END_SRC
 [[https://github.com/TerenceGe/sr25519-donna/blob/dc22624e80ce1c8fb4df0936678f6edcd8021dfd/example/src/main.c#L155][example]]
 ** vrf verify
+| param                      | description                                                                                                                           |
+| public                     | the corresponding public key that signing the message                                                                                 |
+| message and message_length | message arrary and length                                                                                                             |
+| output                     | the signature for the message                                                                                                         |
+| proof                      | the proof of the signature                                                                                                            |
+| threshold                  | the vrf threshold, 16 bytes long, if the raw output bytes is less than threshold, the is_less field of result structure will be true. If errors, is_less field of the returned structure is not meant to contain a valid value                          |
 #+BEGIN_SRC C
 VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *message, unsigned long message_length, const sr25519_vrf_output output, const sr25519_vrf_proof proof, const sr25519_vrf_threshold threshold);
 #+END_SRC
 [[https://github.com/TerenceGe/sr25519-donna/blob/dc22624e80ce1c8fb4df0936678f6edcd8021dfd/example/src/main.c#L169][example]]
+** vrf result
+The vrf result contains signature result and is_less: \\
+| result   | the result of the signature currently compatible with the c-binding repo (https://github.com/Warchant/sr25519-crust/blob/2947abb8367d57cd712e8bc80687d224ccd86ccf/src/lib.rs#L31)                               |
+| is_less   | indicate whether the raw output bytes is less than the threshold                               |
+#+BEGIN_SRC C
+typedef enum Sr25519SignatureResult {
+    Ok,
+    EquationFalse,
+    PointDecompressionError,
+    ScalarFormatError,
+    BytesLengthError,
+    NotMarkedSchnorrkel,
+    MuSigAbsent,
+    MuSigInconsistent,
+} Sr25519SignatureResult;
+
+typedef struct VrfResult {
+    Sr25519SignatureResult result;
+    bool is_less;
+} VrfResult;
+#+END_SRC
 ** vrf keypair
-By default, the sr25519_keypair_from_seed functon creates keypair that contains half ed25519 bytes (which is compatible with the wasm crypto lib), vrf requires the keypair is uniform. In this case, you can use sr25519_uniform_keypair_from_seed for keypair creating or sr25519_keypair_ed25519_to_uniform for converting.
+By default, the sr25519_keypair_from_seed functon creates keypair that contains half ed25519 bytes (which is compatible with the wasm crypto lib), vrf requires the keypair is uniform. In this case, you can use sr25519_uniform_keypair_from_seed for keypair creating or sr25519_keypair_ed25519_to_uniform for converting. \\
+
+| param   | description                               |
+| keypair | the output uniform keypair, 96 bytes long |
+| seed    | the input mini secret key, 32 bytes long  |
 #+BEGIN_SRC C
 void sr25519_uniform_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key seed);
+#+END_SRC
+| param           | description                                   |
+| uniform_keypair | the output uniform keypair, 96 bytes long     |
+| ed25519_keypair | the ed25519 compatible keypair, 96 bytes long |
+#+BEGIN_SRC C
 void sr25519_keypair_ed25519_to_uniform(sr25519_keypair uniform_keypair, const sr25519_keypair ed25519_keypair);
 #+END_SRC
 [[https://github.com/TerenceGe/sr25519-donna/blob/7dd704c0530e7aad50c7ec8e6069725f6124645a/example/src/main.c#L148][example]]
