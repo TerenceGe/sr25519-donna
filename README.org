@@ -1,5 +1,5 @@
 #+title: sr25519-donna
-#+MACRO: NEWLINE @@latex:\\@@ @@html:<br>@@ @@ascii:|@@
+#+OPTIONS: \n:t
 
 This is a pure C implementation of polkadot's key derivation and signing algorithm [[https://wiki.polkadot.network/docs/en/learn-cryptography][schnorrkel]]. The goal is to fully compatible with the original [[https://github.com/w3f/schnorrkel][rust version]]. The curve operations are based on [[https://github.com/floodyberry/ed25519-donna][ed25519-donna]]. [[https://github.com/w3f/General-Grants-Program/blob/master/grants/accepted_grant_applications.md#wave-6][file:https://raw.githubusercontent.com/w3f/Open-Grants-Program/master/src/web3%20foundation%20grants_black.jpg]]
 * Compilation
@@ -78,16 +78,16 @@ typedef uint8_t sr25519_vrf_raw_output[16];
 typedef uint8_t sr25519_vrf_threshold[16];
 #+END_SRC
 ** create keypair from seed
-keypair: the output ed25519 compatible keypair, 96 bytes long {{{NEWLINE}}}
+keypair: the output ed25519 compatible keypair, 96 bytes long
 seed:    the input mini secret key, 32 bytes long
 #+BEGIN_SRC C
 void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key seed);
 #+END_SRC
 [[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L27][example]]
 ** sign message
-signature: the signature ouput, 64 bytes long {{{NEWLINE}}}
-public:    the public key of the keypair to sign the message, 32 bytes long {{{NEWLINE}}}
-secret:    the secret key of the keypair to sign the message, 64 bytes long {{{NEWLINE}}}
+signature: the signature ouput, 64 bytes long
+public:    the public key of the keypair to sign the message, 32 bytes long
+secret:    the secret key of the keypair to sign the message, 64 bytes long
 message and message_length: message arrary and length
 #+BEGIN_SRC C
 void sr25519_sign(sr25519_signature signature, const sr25519_public_key public, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length);
