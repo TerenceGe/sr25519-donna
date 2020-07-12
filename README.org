@@ -1,5 +1,4 @@
 #+title: sr25519-donna
-#+OPTIONS: \n:t
 
 This is a pure C implementation of polkadot's key derivation and signing algorithm [[https://wiki.polkadot.network/docs/en/learn-cryptography][schnorrkel]]. The goal is to fully compatible with the original [[https://github.com/w3f/schnorrkel][rust version]]. The curve operations are based on [[https://github.com/floodyberry/ed25519-donna][ed25519-donna]]. [[https://github.com/w3f/General-Grants-Program/blob/master/grants/accepted_grant_applications.md#wave-6][file:https://raw.githubusercontent.com/w3f/Open-Grants-Program/master/src/web3%20foundation%20grants_black.jpg]]
 * Compilation
@@ -78,8 +77,8 @@ typedef uint8_t sr25519_vrf_raw_output[16];
 typedef uint8_t sr25519_vrf_threshold[16];
 #+END_SRC
 ** create keypair from seed
-keypair: the output ed25519 compatible keypair, 96 bytes long
-seed:    the input mini secret key, 32 bytes long
+keypair: the output ed25519 compatible keypair, 96 bytes long \\
+seed:    the input mini secret key, 32 bytes long \\
 #+BEGIN_SRC C
 void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key seed);
 #+END_SRC
