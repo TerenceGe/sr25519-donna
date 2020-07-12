@@ -77,8 +77,9 @@ typedef uint8_t sr25519_vrf_raw_output[16];
 typedef uint8_t sr25519_vrf_threshold[16];
 #+END_SRC
 ** create keypair from seed
-keypair: the output ed25519 compatible keypair, 96 bytes long \\
-seed:    the input mini secret key, 32 bytes long \\
+| param   | description                                          |
+| keypair | the output ed25519 compatible keypair, 96 bytes long |
+| seed    | the input mini secret key, 32 bytes long             |
 #+BEGIN_SRC C
 void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key seed);
 #+END_SRC
