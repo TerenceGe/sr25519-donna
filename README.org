@@ -85,9 +85,9 @@ void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secre
 [[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L27][example]]
 ** sign message
 signature: the signature ouput, 64 bytes long \\
-public:    the public key of the keypair to sign the message, 32 bytes long \\\\
-secret:    the secret key of the keypair to sign the message, 64 bytes long \\
-message and message_length: message arrary and length \\
+public:    the public key of the keypair to sign the message, 32 bytes long
+secret:    the secret key of the keypair to sign the message, 64 bytes long
+message and message_length: message arrary and length
 #+BEGIN_SRC C
 void sr25519_sign(sr25519_signature signature, const sr25519_public_key public, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length);
 #+END_SRC
