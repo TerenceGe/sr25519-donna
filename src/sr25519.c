@@ -405,7 +405,7 @@ void from_le_bytes(uint8_t *out, const uint8_t *in, size_t len) {
     }
 }
 
-VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, const sr25519_keypair keypair, const uint8_t *message, unsigned long message_length, const sr25519_vrf_threshold limit) {
+VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, const sr25519_keypair keypair, const uint8_t *message, unsigned long message_length, const sr25519_vrf_threshold threshold) {
     merlin_transcript t = {0};
     merlin_transcript_init(&t, (uint8_t *)"SigningContext", 14);
     merlin_transcript_commit_bytes(&t, (uint8_t *)"", 0, (uint8_t *)"substrate", 9);
@@ -433,10 +433,10 @@ VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, cons
 
     uint8_t raw_output_le[16] = {0};
     from_le_bytes(raw_output_le, raw_output, 16);
-    uint8_t limit_le[16] = {0};
-    from_le_bytes(limit_le, limit, 16);
+    uint8_t threshold_le[16] = {0};
+    from_le_bytes(threshold_le, threshold, 16);
 
-    bool check = memcmp(raw_output_le, limit_le, 16) < 0;
+    bool check = memcmp(raw_output_le, threshold_le, 16) < 0;
 
     memcpy(out_and_proof, io + 32, 32);
     memcpy(out_and_proof + 32, proof, 64);
@@ -452,7 +452,7 @@ VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, cons
         memzero(proof_batchable, 96);
         memzero(raw_output, 16);
         memzero(raw_output_le, 16);
-        memzero(limit_le, 16);
+        memzero(threshold_le, 16);
 
         return vrf_result;
     } else {
@@ -466,7 +466,7 @@ VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, cons
         memzero(proof_batchable, 96);
         memzero(raw_output, 16);
         memzero(raw_output_le, 16);
-        memzero(limit_le, 16);
+        memzero(threshold_le, 16);
 
         return vrf_result;
     }
