@@ -130,9 +130,6 @@ uint8_t bignum25519_ct_eq(const bignum25519 a, const bignum25519 b) {
 
     uint8_t result = uint8_32_ct_eq(c, d);
 
-    memzero(c, sizeof(c));
-    memzero(d, sizeof(d));
-
     return result;
 }
 
@@ -189,18 +186,6 @@ uint8_t curve25519_sqrt_ratio_i(bignum25519 out, const bignum25519 u, const bign
 
     curve25519_copy(out, r);
 
-    memzero(tmp, sizeof(tmp));
-    memzero(v3, sizeof(v3));
-    memzero(v7, sizeof(v7));
-    memzero(r, sizeof(r));
-    memzero(r_prime, sizeof(r_prime));
-    memzero(r_negative, sizeof(r_negative));
-    memzero(check, sizeof(check));
-    memzero(i, sizeof(i));
-    memzero(u_neg, sizeof(u_neg));
-    memzero(u_neg_i, sizeof(u_neg_i));
-    memzero(r_bytes, sizeof(r_bytes));
-
     return was_nonzero_square;
 }
 
@@ -245,25 +230,6 @@ int ristretto_decode(ge25519 *element, const unsigned char bytes[32]) {
 
     // Bail out if the field element encoding was non-canonical or negative
     if (s_encoding_is_canonical == 0 || s_is_negative == 1) {
-        memzero(s, sizeof(s));
-        memzero(ss, sizeof(ss));
-        memzero(u1, sizeof(u1));
-        memzero(u1_sqr, sizeof(u1_sqr));
-        memzero(u2, sizeof(u2));
-        memzero(u2_sqr, sizeof(u2_sqr));
-        memzero(v, sizeof(v));
-        memzero(i, sizeof(i));
-        memzero(minus_d, sizeof(minus_d));
-        memzero(dx, sizeof(dx));
-        memzero(dy, sizeof(dy));
-        memzero(tmp, sizeof(tmp));
-        memzero(s_bytes_check, sizeof(s_bytes_check));
-        memzero(x_bytes, sizeof(x_bytes));
-        memzero(t_bytes, sizeof(t_bytes));
-        memzero(x, sizeof(x));
-        memzero(y, sizeof(y));
-        memzero(t, sizeof(t));
-
         return 0;
     }
 
@@ -304,25 +270,6 @@ int ristretto_decode(ge25519 *element, const unsigned char bytes[32]) {
     y_is_zero = bignum25519_ct_eq(zero, y);
 
     if (ok == 0 || t_is_negative == 1 || y_is_zero == 1) {
-        memzero(s, sizeof(s));
-        memzero(ss, sizeof(ss));
-        memzero(u1, sizeof(u1));
-        memzero(u1_sqr, sizeof(u1_sqr));
-        memzero(u2, sizeof(u2));
-        memzero(u2_sqr, sizeof(u2_sqr));
-        memzero(v, sizeof(v));
-        memzero(i, sizeof(i));
-        memzero(minus_d, sizeof(minus_d));
-        memzero(dx, sizeof(dx));
-        memzero(dy, sizeof(dy));
-        memzero(tmp, sizeof(tmp));
-        memzero(s_bytes_check, sizeof(s_bytes_check));
-        memzero(x_bytes, sizeof(x_bytes));
-        memzero(t_bytes, sizeof(t_bytes));
-        memzero(x, sizeof(x));
-        memzero(y, sizeof(y));
-        memzero(t, sizeof(t));
-
         return 0;
     }
 
@@ -330,25 +277,6 @@ int ristretto_decode(ge25519 *element, const unsigned char bytes[32]) {
     curve25519_copy(element->y, y);
     curve25519_copy(element->z, one);
     curve25519_copy(element->t, t);
-
-    memzero(s, sizeof(s));
-    memzero(ss, sizeof(ss));
-    memzero(u1, sizeof(u1));
-    memzero(u1_sqr, sizeof(u1_sqr));
-    memzero(u2, sizeof(u2));
-    memzero(u2_sqr, sizeof(u2_sqr));
-    memzero(v, sizeof(v));
-    memzero(i, sizeof(i));
-    memzero(minus_d, sizeof(minus_d));
-    memzero(dx, sizeof(dx));
-    memzero(dy, sizeof(dy));
-    memzero(tmp, sizeof(tmp));
-    memzero(s_bytes_check, sizeof(s_bytes_check));
-    memzero(x_bytes, sizeof(x_bytes));
-    memzero(t_bytes, sizeof(t_bytes));
-    memzero(x, sizeof(x));
-    memzero(y, sizeof(y));
-    memzero(t, sizeof(t));
 
     return 1;
 }
@@ -416,26 +344,6 @@ void ristretto_encode(unsigned char bytes[32], const ge25519 element) {
 
     // Output the compressed form of s
     curve25519_contract(bytes, s);
-
-    memzero(u1, sizeof(u1));
-    memzero(u2, sizeof(u2));
-    memzero(u22, sizeof(u22));
-    memzero(i1, sizeof(i1));
-    memzero(i2, sizeof(i2));
-    memzero(z_inv, sizeof(z_inv));
-    memzero(den_inv, sizeof(den_inv));
-    memzero(ix, sizeof(ix));
-    memzero(iy, sizeof(iy));
-    memzero(invsqrt, sizeof(invsqrt));
-    memzero(tmp1, sizeof(tmp1));
-    memzero(tmp2, sizeof(tmp2));
-    memzero(x, sizeof(x));
-    memzero(y, sizeof(y));
-    memzero(y_neg, sizeof(y_neg));
-    memzero(s, sizeof(s));
-    memzero(s_neg, sizeof(s_neg));
-    memzero(enchanted_denominator, sizeof(enchanted_denominator));
-    memzero(contracted, sizeof(contracted));
 }
 
 /**
@@ -454,11 +362,6 @@ int ristretto_ct_eq(const ge25519 *a, const ge25519 *b) {
 
     check_one = bignum25519_ct_eq(x1y2, y1x2);
     check_two = bignum25519_ct_eq(x1x2, y1y2);
-
-    memzero(x1y2, sizeof(x1y2));
-    memzero(y1x2, sizeof(y1x2));
-    memzero(x1x2, sizeof(x1x2));
-    memzero(y1y2, sizeof(y1y2));
 
     return check_one | check_two;
 }
@@ -504,33 +407,6 @@ void elligator_ristretto_flavor(ge25519 *P, const bignum25519 r0) {
     curve25519_copy(P->y, py);
     curve25519_copy(P->z, pz);
     curve25519_copy(P->t, pt);
-
-    memzero(r, sizeof(r));
-    memzero(r02, sizeof(r02));
-    memzero(rOne, sizeof(rOne));
-    memzero(Ns, sizeof(Ns));
-    memzero(d_mul_r, sizeof(d_mul_r));
-    memzero(c_min_d_mul_r, sizeof(c_min_d_mul_r));
-    memzero(r_add_d, sizeof(r_add_d));
-    memzero(D, sizeof(D));
-    memzero(s, sizeof(s));
-    memzero(s_prime, sizeof(s_prime));
-    memzero(s_prime_neg, sizeof(s_prime_neg));
-    memzero(c, sizeof(c));
-    memzero(r_min_one, sizeof(r_min_one));
-    memzero(c_mul_r_min_one, sizeof(c_mul_r_min_one));
-    memzero(c_mul_r_min_one_mul_d, sizeof(c_mul_r_min_one_mul_d));
-    memzero(Nt, sizeof(Nt));
-    memzero(s2, sizeof(s2));
-    memzero(s_add_s, sizeof(s_add_s));
-    memzero(x, sizeof(x));
-    memzero(y, sizeof(y));
-    memzero(z, sizeof(z));
-    memzero(t, sizeof(t));
-    memzero(px, sizeof(px));
-    memzero(py, sizeof(py));
-    memzero(pz, sizeof(pz));
-    memzero(pt, sizeof(pt));
 }
 
 void ristretto_from_uniform_bytes(ge25519 *element, const unsigned char bytes[64]) {
@@ -549,13 +425,6 @@ void ristretto_from_uniform_bytes(ge25519 *element, const unsigned char bytes[64
     elligator_ristretto_flavor(&R_2, r_2);
 
     ge25519_add(element, &R_1, &R_2);
-
-    memzero(r_1_bytes, sizeof(r_1_bytes));
-    memzero(r_2_bytes, sizeof(r_2_bytes));
-    memzero(r_1, sizeof(r_1));
-    memzero(r_1, sizeof(r_1));
-    memzero(&R_1, sizeof(R_1));
-    memzero(&R_2, sizeof(R_2));
 }
 
 /*
@@ -641,10 +510,4 @@ void ge25519_scalarmult(ge25519 *r, const ge25519 *p1, const bignum256modm s1) {
         ge25519_p1p1_to_partial(r, &t);
     }
     curve25519_mul(r->t, t.x, t.y);
-
-    memzero(slide1, sizeof(slide1));
-    memzero(&pre1, sizeof(pre1));
-    memzero(&pre, sizeof(pre));
-    memzero(&d1, sizeof(d1));
-    memzero(&t, sizeof(t));
 }

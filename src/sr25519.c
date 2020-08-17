@@ -4,7 +4,6 @@
 #include "sr25519-hash.h"
 #include "ristretto255.h"
 #include "merlin.h"
-#include "memzero.h"
 #include "vrf.h"
 
 void divide_scalar_bytes_by_cofactor(uint8_t *scalar, size_t scalar_len) {
@@ -39,7 +38,6 @@ void expand_ed25519(sr25519_secret_key_key key, sr25519_secret_key_nonce nonce, 
     divide_scalar_bytes_by_cofactor(key, 32);
     key[31] &= 0b1111111;
     memcpy(nonce, hash + 32, 32);
-    memzero(hash, sizeof(hash));
 }
 
 void expand_uniform(sr25519_secret_key_key key, sr25519_secret_key_nonce nonce, sr25519_mini_secret_key mini_secret_key) {
@@ -54,8 +52,6 @@ void expand_uniform(sr25519_secret_key_key key, sr25519_secret_key_nonce nonce, 
     expand256_modm(scalar, scalar_bytes, 64);
     contract256_modm(key, scalar);
     merlin_transcript_challenge_bytes(&t, (uint8_t *)"no", 2, nonce, 32);
-
-    memzero(&t, sizeof(t));
 }
 
 void hard_derive_mini_secret_key(sr25519_mini_secret_key key_out, sr25519_chain_code chain_code_out, const sr25519_mini_secret_key key_in, const sr25519_chain_code chain_code_in) {
@@ -67,8 +63,6 @@ void hard_derive_mini_secret_key(sr25519_mini_secret_key key_out, sr25519_chain_
     merlin_transcript_commit_bytes(&t, (uint8_t *)"secret-key", 10, key_in, 32);
     merlin_transcript_challenge_bytes(&t, (uint8_t *)"HDKD-hard", 9, key_out, 32);
     merlin_transcript_challenge_bytes(&t, (uint8_t *)"HDKD-chaincode", 14, chain_code_out, 32);
-
-    memzero(&t, sizeof(t));
 }
 
 void derive_scalar_and_chaincode(merlin_transcript *t, bignum256modm *scalar, sr25519_chain_code chain_code_out, const sr25519_public_key public, const sr25519_chain_code chain_code_in) {
@@ -80,8 +74,6 @@ void derive_scalar_and_chaincode(merlin_transcript *t, bignum256modm *scalar, sr
     expand256_modm(scalar, buf, 64);
 
     merlin_transcript_challenge_bytes(t, (uint8_t *)"HDKD-chaincode", 14, chain_code_out, 32);
-
-    memzero(buf, sizeof(buf));
 }
 
 void derived_secret_key_simple(sr25519_secret_key_key key_out, sr25519_secret_key_nonce nonce_out, sr25519_chain_code chain_code_out, const sr25519_public_key public, const sr25519_secret_key_key key_in, const sr25519_secret_key_nonce nonce_in, const sr25519_chain_code chain_code_in) {
@@ -113,14 +105,6 @@ void derived_secret_key_simple(sr25519_secret_key_key key_out, sr25519_secret_ke
     sr25519_randombytes(entropy, 32);
     merlin_rng_finalize(&mrng, entropy);
     merlin_rng_random_bytes(&mrng, nonce_out, 32);
-
-    memzero(scalar, sizeof(scalar));
-    memzero(original_scalar, sizeof(original_scalar));
-    memzero(final_scalar, sizeof(final_scalar));
-    memzero(&mrng, sizeof(mrng));
-    memzero(entropy, sizeof(entropy));
-    memzero(witness_data, sizeof(witness_data));
-    memzero(&t, sizeof(t));
 }
 
 void private_key_to_publuc_key(sr25519_public_key public_key, sr25519_secret_key private_key) {
@@ -130,9 +114,6 @@ void private_key_to_publuc_key(sr25519_public_key public_key, sr25519_secret_key
 
     ge25519_scalarmult_base_niels(&P, ge25519_niels_base_multiples, s);
     ristretto_encode(public_key, P);
-
-    memzero(&P, sizeof(P));
-    memzero(s, sizeof(s));
 }
 
 void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key mini_secret_key) {
@@ -146,10 +127,6 @@ void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secre
     memcpy(keypair, secret_key_key, 32);
     memcpy(keypair + 32, secret_key_nonce, 32);
     memcpy(keypair + 64, public_key, 32);
-
-    memzero(secret_key_key, sizeof(secret_key_key));
-    memzero(secret_key_nonce, sizeof(secret_key_nonce));
-    memzero(public_key, sizeof(public_key));
 }
 
 void sr25519_uniform_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secret_key mini_secret_key) {
@@ -162,10 +139,6 @@ void sr25519_uniform_keypair_from_seed(sr25519_keypair keypair, const sr25519_mi
     memcpy(keypair, secret_key_key, 32);
     memcpy(keypair + 32, secret_key_nonce, 32);
     memcpy(keypair + 64, public_key, 32);
-
-    memzero(secret_key_key, sizeof(secret_key_key));
-    memzero(secret_key_nonce, sizeof(secret_key_nonce));
-    memzero(public_key, sizeof(public_key));
 }
 
 void sr25519_keypair_ed25519_to_uniform(sr25519_keypair uniform_keypair, const sr25519_keypair ed25519_keypair) {
@@ -175,8 +148,6 @@ void sr25519_keypair_ed25519_to_uniform(sr25519_keypair uniform_keypair, const s
 
     memcpy(uniform_keypair, secret_key_key, 32);
     memcpy(uniform_keypair + 32, ed25519_keypair + 32, 64);
-
-    memzero(secret_key_key, sizeof(secret_key_key));
 }
 
 void sr25519_derive_keypair_hard(sr25519_keypair keypair_out, const sr25519_keypair keypair_in, const sr25519_chain_code chain_code_in) {
@@ -190,10 +161,6 @@ void sr25519_derive_keypair_hard(sr25519_keypair keypair_out, const sr25519_keyp
     hard_derive_mini_secret_key(key_out, chain_code_out, key_in, chain_code_in);
 
     sr25519_keypair_from_seed(keypair_out, key_out);
-
-    memzero(key_in, sizeof(key_in));
-    memzero(key_out, sizeof(key_out));
-    memzero(chain_code_out, sizeof(chain_code_out));
 }
 
 void sr25519_derive_keypair_soft(sr25519_keypair keypair_out, const sr25519_keypair keypair_in, const sr25519_chain_code chain_code_in) {
@@ -218,14 +185,6 @@ void sr25519_derive_keypair_soft(sr25519_keypair keypair_out, const sr25519_keyp
     memcpy(keypair_out, key_out, 32);
     memcpy(keypair_out + 32, nonce_out, 32);
     memcpy(keypair_out + 64, public_out, 32);
-
-    memzero(key_in, sizeof(key_in));
-    memzero(nonce_in, sizeof(nonce_in));
-    memzero(public, sizeof(public));
-    memzero(key_out, sizeof(key_out));
-    memzero(public_out, sizeof(public_out));
-    memzero(nonce_out, sizeof(nonce_out));
-    memzero(chain_code_out, sizeof(chain_code_out));
 }
 
 void sr25519_derive_public_soft(sr25519_public_key public_out, const sr25519_public_key public_in, const sr25519_chain_code chain_code_in) {
@@ -243,13 +202,6 @@ void sr25519_derive_public_soft(sr25519_public_key public_out, const sr25519_pub
     ristretto_decode(&P2, public_in);
     ge25519_add(&P, &P1, &P2);
     ristretto_encode(public_out, P);
-
-    memzero(scalar, sizeof(scalar));
-    memzero(chain_code_out, sizeof(chain_code_out));
-    memzero(&t, sizeof(t));
-    memzero(&P, sizeof(P));
-    memzero(&P1, sizeof(P1));
-    memzero(&P2, sizeof(P2));
 }
 
 void sr25519_sign(sr25519_signature signature_out, const sr25519_public_key public, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length) {
@@ -304,22 +256,6 @@ void sr25519_sign(sr25519_signature signature_out, const sr25519_public_key publ
     memcpy(signature_out, R_compressed, 32);
     memcpy(signature_out + 32, s_bytes, 32);
     signature_out[63] |= 128;
-
-    memzero(&t, sizeof(t));
-    memzero(secret_key, sizeof(secret_key));
-    memzero(secret_nonce, sizeof(secret_nonce));
-    memzero(r, sizeof(r));
-    memzero(scalar_bytes, sizeof(scalar_bytes));
-    memzero(&mrng, sizeof(mrng));
-    memzero(entropy, sizeof(entropy));
-    memzero(&R, sizeof(R));
-    memzero(R_compressed, sizeof(R_compressed));
-    memzero(k, sizeof(k));
-    memzero(buf, sizeof(buf));
-    memzero(secret_key_scalar, sizeof(secret_key_scalar));
-    memzero(k_secret_key_scalar, sizeof(k_secret_key_scalar));
-    memzero(s, sizeof(s));
-    memzero(s_bytes, sizeof(s_bytes));
 }
 
 bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public) {
@@ -327,8 +263,6 @@ bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, u
     memcpy(signature_s, signature + 32, 32);
 
     if ((signature_s[31] & 128) == 0) {
-        memzero(signature_s, sizeof(signature_s));
-
         return false;
     }
 
@@ -338,8 +272,6 @@ bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, u
     }
 
     if ((signature_s[31] >> 7) != 0) {
-        memzero(signature_s, sizeof(signature_s));
-
         return false;
     }
 
@@ -366,13 +298,6 @@ bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, u
     int is_canonical = is_reduced256_modm(s);
 
     if (!is_canonical) {
-        memzero(&t, sizeof(t));
-        memzero(signature_R, sizeof(signature_R));
-        memzero(signature_s, sizeof(signature_s));
-        memzero(k, sizeof(k));
-        memzero(s, sizeof(s));
-        memzero(buf, sizeof(buf));
-
         return false;
     }
 
@@ -385,16 +310,6 @@ bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, u
     uint8_t R_compressed[32] = {0};
     ristretto_encode(R_compressed, R);
     uint8_t valid = uint8_32_ct_eq(R_compressed, signature_R);
-
-    memzero(&t, sizeof(t));
-    memzero(signature_R, sizeof(signature_R));
-    memzero(signature_s, sizeof(signature_s));
-    memzero(k, sizeof(k));
-    memzero(s, sizeof(s));
-    memzero(buf, sizeof(buf));
-    memzero(&A, sizeof(A));
-    memzero(&R, sizeof(R));
-    memzero(R_compressed, sizeof(R_compressed));
 
     return valid;
 }
@@ -419,12 +334,6 @@ VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, cons
         VrfResult vrf_result = {0};
         vrf_result.result = sign_result;
         vrf_result.is_less = false;
-
-        memzero(&t, sizeof(merlin_transcript));
-        memzero(io, 64);
-        memzero(proof, 64);
-        memzero(proof_batchable, 96);
-
         return vrf_result;
     }
 
@@ -446,27 +355,11 @@ VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, cons
         vrf_result.result = Ok;
         vrf_result.is_less = true;
 
-        memzero(&t, sizeof(merlin_transcript));
-        memzero(io, 64);
-        memzero(proof, 64);
-        memzero(proof_batchable, 96);
-        memzero(raw_output, 16);
-        memzero(raw_output_le, 16);
-        memzero(threshold_le, 16);
-
         return vrf_result;
     } else {
         VrfResult vrf_result = {0};
         vrf_result.result = Ok;
         vrf_result.is_less = false;
-
-        memzero(&t, sizeof(merlin_transcript));
-        memzero(io, 64);
-        memzero(proof, 64);
-        memzero(proof_batchable, 96);
-        memzero(raw_output, 16);
-        memzero(raw_output_le, 16);
-        memzero(threshold_le, 16);
 
         return vrf_result;
     }
@@ -486,10 +379,6 @@ VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *mes
         VrfResult vrf_result = {0};
         vrf_result.result = verify_result;
         vrf_result.is_less = false;
-
-        memzero(&t1, sizeof(merlin_transcript));
-        memzero(inout, 64);
-        memzero(proof_batchable, 96);
 
         return vrf_result;
     }
@@ -519,16 +408,6 @@ VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *mes
         vrf_result.result = shorten_result;
         vrf_result.is_less = false;
 
-        memzero(&t1, sizeof(merlin_transcript));
-        memzero(&t2, sizeof(merlin_transcript));
-        memzero(inout, 64);
-        memzero(proof_batchable, 96);
-        memzero(raw_output, 16);
-        memzero(raw_output_le, 16);
-        memzero(threshold_le, 16);
-        memzero(verify_output, 32);
-        memzero(decomp_proof, 64);
-
         return vrf_result;
     }
 
@@ -537,31 +416,11 @@ VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *mes
         vrf_result.result = Ok;
         vrf_result.is_less = check;
 
-        memzero(&t1, sizeof(merlin_transcript));
-        memzero(&t2, sizeof(merlin_transcript));
-        memzero(inout, 64);
-        memzero(proof_batchable, 96);
-        memzero(raw_output, 16);
-        memzero(raw_output_le, 16);
-        memzero(threshold_le, 16);
-        memzero(verify_output, 32);
-        memzero(decomp_proof, 64);
-
         return vrf_result;
     } else {
         VrfResult vrf_result = {0};
         vrf_result.result = EquationFalse;
         vrf_result.is_less = false;
-
-        memzero(&t1, sizeof(merlin_transcript));
-        memzero(&t2, sizeof(merlin_transcript));
-        memzero(inout, 64);
-        memzero(proof_batchable, 96);
-        memzero(raw_output, 16);
-        memzero(raw_output_le, 16);
-        memzero(threshold_le, 16);
-        memzero(verify_output, 32);
-        memzero(decomp_proof, 64);
 
         return vrf_result;
     }

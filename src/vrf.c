@@ -2,7 +2,6 @@
 #include "vrf.h"
 #include "ristretto255.h"
 #include "sr25519-randombytes.h"
-#include "memzero.h"
 
 #define KUSAMA_VRF 1
 
@@ -29,15 +28,6 @@ Sr25519SignatureResult vrf_sign(sr25519_vrf_io inout, sr25519_vrf_proof proof, s
 
     int is_canonical = is_reduced256_modm(secret_key_scalar);
     if (!is_canonical) {
-        memzero(secret_key, 32);
-        memzero(secret_nonce, 32);
-        memzero(public, 32);
-        memzero(b, 64);
-        memzero(&input, sizeof(ge25519));
-        memzero(&output, sizeof(ge25519));
-        memzero(&secret_key_scalar, sizeof(bignum256modm));
-        memzero(&input_compressed, 32);
-
         Sr25519SignatureResult result = ScalarFormatError;
         return result;
     }
@@ -113,31 +103,6 @@ Sr25519SignatureResult vrf_sign(sr25519_vrf_io inout, sr25519_vrf_proof proof, s
     memcpy(proof_batchable + 32, Hr_compressed, 32);
     memcpy(proof_batchable + 64, s, 32);
 
-    memzero(secret_key, 32);
-    memzero(secret_nonce, 32);
-    memzero(public, 32);
-    memzero(b, 64);
-    memzero(&input, sizeof(ge25519));
-    memzero(&output, sizeof(ge25519));
-    memzero(&secret_key_scalar, sizeof(bignum256modm));
-    memzero(&input_compressed, 32);
-    memzero(&output_compressed, 32);
-    memzero(&e, sizeof(merlin_transcript));
-    memzero(&r_scalar, sizeof(bignum256modm));
-    memzero(scalar_bytes, 64);
-    memzero(&mrng, sizeof(merlin_rng));
-    memzero(entropy, 32);
-    memzero(&R, sizeof(ge25519));
-    memzero(R_compressed, 32);
-    memzero(&Hr, sizeof(ge25519));
-    memzero(Hr_compressed, 32);
-    memzero(&c_scalar, sizeof(bignum256modm));
-    memzero(buf, 64);
-    memzero(&c_secret_key_scalar, sizeof(bignum256modm));
-    memzero(&s_scalar, sizeof(bignum256modm));
-    memzero(c, 32);
-    memzero(s, 32);
-
     Sr25519SignatureResult result = Ok;
     return result;
 }
@@ -186,18 +151,6 @@ Sr25519SignatureResult shorten_vrf(sr25519_vrf_proof proof, const sr25519_vrf_pr
 
     memcpy(proof, c, 32);
     memcpy(proof + 32, s, 32);
-
-    memzero(b, 64);
-    memzero(&input, sizeof(ge25519));
-    memzero(input_compressed, 32);
-    memzero(output_compressed, 32);
-    memzero(&e, sizeof(merlin_transcript));
-    memzero(R, 32);
-    memzero(Hr, 32);
-    memzero(s, 32);
-    memzero(&c_scalar, sizeof(bignum256modm));
-    memzero(buf, 64);
-    memzero(c, 32);
 
     Sr25519SignatureResult result = Ok;
     return result;
@@ -270,50 +223,9 @@ Sr25519SignatureResult vrf_verify(sr25519_vrf_io inout, sr25519_vrf_proof_batcha
         memcpy(proof_batchable + 32, Hr_compressed, 32);
         memcpy(proof_batchable + 64, s, 32);
 
-        memzero(c, 32);
-        memzero(s, 32);
-        memzero(b, 64);
-        memzero(&input, sizeof(ge25519));
-        memzero(input_compressed, 32);
-        memzero(output_compressed, 32);
-        memzero(&e, sizeof(merlin_transcript));
-        memzero(&R, sizeof(ge25519));
-        memzero(&P, sizeof(ge25519));
-        memzero(&c_scalar, sizeof(bignum256modm));
-        memzero(&s_scalar, sizeof(bignum256modm));
-        memzero(R_compressed, 32);
-        memzero(&Hr, sizeof(ge25519));
-        memzero(&CP, sizeof(ge25519));
-        memzero(&SP, sizeof(ge25519));
-        memzero(&output, sizeof(ge25519));
-        memzero(Hr_compressed, 32);
-        memzero(&verify_c_scalar, sizeof(bignum256modm));
-        memzero(buf, 64);
-        memzero(verify_c, 32);
-
         Sr25519SignatureResult result = Ok;
         return result;
     } else {
-        memzero(c, 32);
-        memzero(s, 32);
-        memzero(b, 64);
-        memzero(&input, sizeof(ge25519));
-        memzero(input_compressed, 32);
-        memzero(output_compressed, 32);
-        memzero(&e, sizeof(merlin_transcript));
-        memzero(&R, sizeof(ge25519));
-        memzero(&P, sizeof(ge25519));
-        memzero(&c_scalar, sizeof(bignum256modm));
-        memzero(&s_scalar, sizeof(bignum256modm));
-        memzero(R_compressed, 32);
-        memzero(&Hr, sizeof(ge25519));
-        memzero(&CP, sizeof(ge25519));
-        memzero(&SP, sizeof(ge25519));
-        memzero(&output, sizeof(ge25519));
-        memzero(Hr_compressed, 32);
-        memzero(&verify_c_scalar, sizeof(bignum256modm));
-        memzero(buf, 64);
-        memzero(verify_c, 32);
 
         Sr25519SignatureResult result = EquationFalse;
         return result;
@@ -331,8 +243,4 @@ void io_make_bytes(sr25519_vrf_raw_output raw_output, const sr25519_vrf_io inout
     merlin_transcript_commit_bytes(&t, (uint8_t *)"vrf-in", 6, input, 32);
     merlin_transcript_commit_bytes(&t, (uint8_t *)"vrf-out", 7, output, 32);
     merlin_transcript_challenge_bytes(&t, (uint8_t *)"", 0, raw_output, 16);
-
-    memzero(&t, sizeof(merlin_transcript));
-    memzero(input, 32);
-    memzero(output, 32);
 }
