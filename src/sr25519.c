@@ -107,7 +107,7 @@ void derived_secret_key_simple(sr25519_secret_key_key key_out, sr25519_secret_ke
     merlin_rng_random_bytes(&mrng, nonce_out, 32);
 }
 
-void private_key_to_publuc_key(sr25519_public_key public_key, sr25519_secret_key private_key) {
+void private_key_to_public_key(sr25519_public_key public_key, sr25519_secret_key private_key) {
     ge25519 P = {0};
     bignum256modm s = {0};
     expand_raw256_modm(s, private_key);
@@ -121,7 +121,7 @@ void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secre
     sr25519_secret_key_nonce secret_key_nonce = {0};
     expand_ed25519(secret_key_key, secret_key_nonce, mini_secret_key);
     sr25519_public_key public_key = {0};
-    private_key_to_publuc_key(public_key, secret_key_key);
+    private_key_to_public_key(public_key, secret_key_key);
     multiply_scalar_bytes_by_cofactor(secret_key_key, 32);
 
     memcpy(keypair, secret_key_key, 32);
@@ -134,7 +134,7 @@ void sr25519_uniform_keypair_from_seed(sr25519_keypair keypair, const sr25519_mi
     sr25519_secret_key_nonce secret_key_nonce = {0};
     expand_ed25519(secret_key_key, secret_key_nonce, mini_secret_key);
     sr25519_public_key public_key = {0};
-    private_key_to_publuc_key(public_key, secret_key_key);
+    private_key_to_public_key(public_key, secret_key_key);
 
     memcpy(keypair, secret_key_key, 32);
     memcpy(keypair + 32, secret_key_nonce, 32);
@@ -179,7 +179,7 @@ void sr25519_derive_keypair_soft(sr25519_keypair keypair_out, const sr25519_keyp
 
     derived_secret_key_simple(key_out, nonce_out, chain_code_out, public, key_in, nonce_in, chain_code_in);
 
-    private_key_to_publuc_key(public_out, key_out);
+    private_key_to_public_key(public_out, key_out);
     multiply_scalar_bytes_by_cofactor(key_out, 32);
 
     memcpy(keypair_out, key_out, 32);
