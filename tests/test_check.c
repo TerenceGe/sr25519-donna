@@ -5,6 +5,27 @@
 
 #define FROMHEX_MAXLEN 512
 
+uint8_t uchar_ct_eq(const unsigned char a, const unsigned char b) {
+    unsigned char x = ~(a ^ b);
+
+    x &= x >> 4;
+    x &= x >> 2;
+    x &= x >> 1;
+
+    return (uint8_t)x;
+}
+
+uint8_t uint8_32_ct_eq(const unsigned char a[32], const unsigned char b[32]) {
+    unsigned char x = 1;
+    unsigned char i;
+
+    for (i=0; i<32; i++) {
+        x &= uchar_ct_eq(a[i], b[i]);
+    }
+
+    return (uint8_t)x;
+}
+
 const uint8_t *fromhex(const char *str) {
   static uint8_t buf[FROMHEX_MAXLEN];
   size_t len = strlen(str) / 2;
