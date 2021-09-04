@@ -477,7 +477,7 @@ void ge25519_move_conditional_pniels_array(ge25519_pniels * r, const ge25519_pni
 }
 
 /* computes [s1]p1, constant time */
-void ge25519_scalarmult(ge25519 *r, const ge25519 *p1, const bignum256modm s1) {
+void ge25519_scalarmult_tg(ge25519 *r, const ge25519 *p1, const bignum256modm s1) {
     signed char slide1[64] = {0};
     ge25519_pniels pre1[9] = {0};
     ge25519_pniels pre = {0};

@@ -15,6 +15,6 @@ int ristretto_decode(ge25519 *element, const unsigned char bytes[32]);
 void ristretto_encode(unsigned char bytes[32], const ge25519 element);
 void ristretto_from_uniform_bytes(ge25519 *element, const unsigned char bytes[64]);
 int ristretto_ct_eq(const ge25519 *a, const ge25519 *b);
-void ge25519_scalarmult(ge25519 *r, const ge25519 *p1, const bignum256modm s1);
+void ge25519_scalarmult_tg(ge25519 *r, const ge25519 *p1, const bignum256modm s1);
 
 #endif

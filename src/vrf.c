@@ -32,7 +32,7 @@ Sr25519SignatureResult vrf_sign(sr25519_vrf_io inout, sr25519_vrf_proof proof, s
         return result;
     }
 
-    ge25519_scalarmult(&output, &input, secret_key_scalar);
+    ge25519_scalarmult_tg(&output, &input, secret_key_scalar);
 
     uint8_t output_compressed[32] = {0};
     ristretto_encode(output_compressed, output);
@@ -68,7 +68,7 @@ Sr25519SignatureResult vrf_sign(sr25519_vrf_io inout, sr25519_vrf_proof proof, s
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:R=g^r", 9, R_compressed, 32);
 
     ge25519 Hr = {0};
-    ge25519_scalarmult(&Hr, &input, r_scalar);
+    ge25519_scalarmult_tg(&Hr, &input, r_scalar);
     uint8_t Hr_compressed[32] = {0};
     ristretto_encode(Hr_compressed, Hr);
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:h^r", 7, Hr_compressed, 32);
@@ -197,8 +197,8 @@ Sr25519SignatureResult vrf_verify(sr25519_vrf_io inout, sr25519_vrf_proof_batcha
 
     ge25519 Hr, CP, SP, output = {0};
     ristretto_decode(&output, output_compressed);
-    ge25519_scalarmult(&CP, &output, c_scalar);
-    ge25519_scalarmult(&SP, &input, s_scalar);
+    ge25519_scalarmult_tg(&CP, &output, c_scalar);
+    ge25519_scalarmult_tg(&SP, &input, s_scalar);
     ge25519_add(&Hr, &CP, &SP);
     sr25519_public_key Hr_compressed = {0};
     ristretto_encode(Hr_compressed, Hr);
