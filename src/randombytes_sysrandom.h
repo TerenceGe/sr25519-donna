@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-SODIUM_EXPORT
+SR25519_DONNA_EXPORT
 extern struct randombytes_implementation randombytes_sysrandom_implementation;
 
 #ifdef __cplusplus

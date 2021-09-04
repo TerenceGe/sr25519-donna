@@ -1,5 +1,5 @@
-#ifndef sodium_core_H
-#define sodium_core_H
+#ifndef sr25519_donna_core_H
+#define sr25519_donna_core_H
 
 #include "sr25519-randombytes-default.h"
 
@@ -7,8 +7,8 @@
 extern "C" {
 #endif
 
-SODIUM_EXPORT
-void sodium_misuse(void)
+SR25519_DONNA_EXPORT
+void sr25519_donna_misuse(void)
             __attribute__ ((noreturn));
 
 #ifdef __cplusplus

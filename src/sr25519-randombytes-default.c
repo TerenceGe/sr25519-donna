@@ -185,7 +185,7 @@ randombytes_buf(void * const buf, const size_t size)
 /* #if SIZE_MAX > 0x4000000000ULL */
 /*     COMPILER_ASSERT(randombytes_BYTES_MAX <= 0x4000000000ULL); */
 /*     if (size > 0x4000000000ULL) { */
-/*         sodium_misuse(); */
+/*        sr25519_donna_misuse(); */
 /*     } */
 /* #endif */
 /*     crypto_stream_chacha20_ietf((unsigned char *) buf, (unsigned long long) size, nonce, seed); */

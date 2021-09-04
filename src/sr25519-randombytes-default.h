@@ -15,33 +15,33 @@
 # define __attribute__(a)
 #endif
 
-#ifdef SODIUM_STATIC
-# define SODIUM_EXPORT
-# define SODIUM_EXPORT_WEAK
+#ifdef SR25519_DONNA_STATIC
+# define SR25519_DONNA_EXPORT
+# define SR25519_DONNA_EXPORT_WEAK
 #else
 # if defined(_MSC_VER)
-#  ifdef SODIUM_DLL_EXPORT
-#   define SODIUM_EXPORT __declspec(dllexport)
+#  ifdef SR25519_DONNA_DLL_EXPORT
+#   define SR25519_DONNA_EXPORT __declspec(dllexport)
 #  else
-#   define SODIUM_EXPORT __declspec(dllimport)
+#   define SR25519_DONNA_EXPORT __declspec(dllimport)
 #  endif
 # else
 #  if defined(__SUNPRO_C)
 #   ifndef __GNU_C__
-#    define SODIUM_EXPORT __attribute__ (visibility(__global))
+#    define SR25519_DONNA_EXPORT __attribute__ (visibility(__global))
 #   else
-#    define SODIUM_EXPORT __attribute__ __global
+#    define SR25519_DONNA_EXPORT __attribute__ __global
 #   endif
 #  elif defined(_MSG_VER)
-#   define SODIUM_EXPORT extern __declspec(dllexport)
+#   define SR25519_DONNA_EXPORT extern __declspec(dllexport)
 #  else
-#   define SODIUM_EXPORT __attribute__ ((visibility ("default")))
+#   define SR25519_DONNA_EXPORT __attribute__ ((visibility ("default")))
 #  endif
 # endif
-# if defined(__ELF__) && !defined(SODIUM_DISABLE_WEAK_FUNCTIONS)
-#  define SODIUM_EXPORT_WEAK SODIUM_EXPORT __attribute__((weak))
+# if defined(__ELF__) && !defined(SR25519_DONNA_DISABLE_WEAK_FUNCTIONS)
+#  define SR25519_DONNA_EXPORT_WEAK SR25519_DONNA_EXPORT __attribute__((weak))
 # else
-#  define SODIUM_EXPORT_WEAK SODIUM_EXPORT
+#  define SR25519_DONNA_EXPORT_WEAK SR25519_DONNA_EXPORT
 # endif
 #endif
 
@@ -53,8 +53,8 @@
 # endif
 #endif
 
-#define SODIUM_MIN(A, B) ((A) < (B) ? (A) : (B))
-#define SODIUM_SIZE_MAX SODIUM_MIN(UINT64_MAX, SIZE_MAX)
+#define SR25519_DONNA_MIN(A, B) ((A) < (B) ? (A) : (B))
+#define SR25519_DONNA_SIZE_MAX SR25519_DONNA_MIN(UINT64_MAX, SIZE_MAX)
 
 #ifdef __cplusplus
 # ifdef __GNUC__
@@ -72,43 +72,43 @@ typedef struct randombytes_implementation {
     int         (*close)(void);               /* optional */
 } randombytes_implementation;
 
-#define randombytes_BYTES_MAX SODIUM_MIN(SODIUM_SIZE_MAX, 0xffffffffUL)
+#define randombytes_BYTES_MAX SR25519_DONNA_MIN(SR25519_DONNA_SIZE_MAX, 0xffffffffUL)
 
 #define randombytes_SEEDBYTES 32U
-SODIUM_EXPORT
+SR25519_DONNA_EXPORT
 size_t randombytes_seedbytes(void);
 
-SODIUM_EXPORT
+SR25519_DONNA_EXPORT
 void randombytes_buf(void * const buf, const size_t size)
             __attribute__ ((nonnull));
 
-/* SODIUM_EXPORT */
+/* SR25519_DONNA_EXPORT */
 /* void randombytes_buf_deterministic(void * const buf, const size_t size, */
 /*                                    const unsigned char seed[randombytes_SEEDBYTES]) */
 /*             __attribute__ ((nonnull)); */
 
-SODIUM_EXPORT
+SR25519_DONNA_EXPORT
 uint32_t randombytes_random(void);
 
-SODIUM_EXPORT
+SR25519_DONNA_EXPORT
 uint32_t randombytes_uniform(const uint32_t upper_bound);
 
-SODIUM_EXPORT
+SR25519_DONNA_EXPORT
 void randombytes_stir(void);
 
-SODIUM_EXPORT
+SR25519_DONNA_EXPORT
 int randombytes_close(void);
 
-SODIUM_EXPORT
+SR25519_DONNA_EXPORT
 int randombytes_set_implementation(randombytes_implementation *impl)
             __attribute__ ((nonnull));
 
-SODIUM_EXPORT
+SR25519_DONNA_EXPORT
 const char *randombytes_implementation_name(void);
 
 /* -- NaCl compatibility interface -- */
 
-SODIUM_EXPORT
+SR25519_DONNA_EXPORT
 void randombytes(unsigned char * const buf, const unsigned long long buf_len)
             __attribute__ ((nonnull));
 

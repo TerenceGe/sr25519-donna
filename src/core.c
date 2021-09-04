@@ -16,23 +16,23 @@ static volatile int locked;
 
 #ifdef _WIN32
 
-static CRITICAL_SECTION _sodium_lock;
-static volatile LONG    _sodium_lock_initialized;
+static CRITICAL_SECTION _sr25519_donna_lock;
+static volatile LONG    _sr25519_donna_lock_initialized;
 
 int
-_sodium_crit_init(void)
+_sr25519_donna_crit_init(void)
 {
     LONG status = 0L;
 
-    while ((status = InterlockedCompareExchange(&_sodium_lock_initialized,
+    while ((status = InterlockedCompareExchange(&_sr25519_donna_lock_initialized,
                                                 1L, 0L)) == 1L) {
         Sleep(0);
     }
 
     switch (status) {
     case 0L:
-        InitializeCriticalSection(&_sodium_lock);
-        return InterlockedExchange(&_sodium_lock_initialized, 2L) == 1L ? 0 : -1;
+        InitializeCriticalSection(&_sr25519_donna_lock);
+        return InterlockedExchange(&_sr25519_donna_lock_initialized, 2L) == 1L ? 0 : -1;
     case 2L:
         return 0;
     default: /* should never be reached */
@@ -41,12 +41,12 @@ _sodium_crit_init(void)
 }
 
 int
-sodium_crit_enter(void)
+sr25519_donna_crit_enter(void)
 {
-    if (_sodium_crit_init() != 0) {
+    if (_sr25519_donna_crit_init() != 0) {
         return -1; /* LCOV_EXCL_LINE */
     }
-    EnterCriticalSection(&_sodium_lock);
+    EnterCriticalSection(&_sr25519_donna_lock);
     assert(locked == 0);
     locked = 1;
 
@@ -54,7 +54,7 @@ sodium_crit_enter(void)
 }
 
 int
-sodium_crit_leave(void)
+sr25519_donna_crit_leave(void)
 {
     if (locked == 0) {
 # ifdef EPERM
@@ -63,21 +63,21 @@ sodium_crit_leave(void)
         return -1;
     }
     locked = 0;
-    LeaveCriticalSection(&_sodium_lock);
+    LeaveCriticalSection(&_sr25519_donna_lock);
 
     return 0;
 }
 
 #elif defined(HAVE_PTHREAD) && !defined(__EMSCRIPTEN__)
 
-static pthread_mutex_t _sodium_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t _sr25519_donna_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int
-sodium_crit_enter(void)
+sr25519_donna_crit_enter(void)
 {
     int ret;
 
-    if ((ret = pthread_mutex_lock(&_sodium_lock)) == 0) {
+    if ((ret = pthread_mutex_lock(&_sr25519_donna_lock)) == 0) {
         assert(locked == 0);
         locked = 1;
     }
@@ -85,7 +85,7 @@ sodium_crit_enter(void)
 }
 
 int
-sodium_crit_leave(void)
+sr25519_donna_crit_leave(void)
 {
     if (locked == 0) {
 # ifdef EPERM
@@ -95,21 +95,21 @@ sodium_crit_leave(void)
     }
     locked = 0;
 
-    return pthread_mutex_unlock(&_sodium_lock);
+    return pthread_mutex_unlock(&_sr25519_donna_lock);
 }
 
 #elif defined(HAVE_ATOMIC_OPS) && !defined(__EMSCRIPTEN__)
 
-static volatile int _sodium_lock;
+static volatile int _sr25519_donna_lock;
 
 int
-sodium_crit_enter(void)
+sr25519_donna_crit_enter(void)
 {
 # ifdef HAVE_NANOSLEEP
     struct timespec q;
     memset(&q, 0, sizeof q);
 # endif
-    while (__sync_lock_test_and_set(&_sodium_lock, 1) != 0) {
+    while (__sync_lock_test_and_set(&_sr25519_donna_lock, 1) != 0) {
 # ifdef HAVE_NANOSLEEP
         (void) nanosleep(&q, NULL);
 # elif defined(__x86_64__) || defined(__i386__)
@@ -120,9 +120,9 @@ sodium_crit_enter(void)
 }
 
 int
-sodium_crit_leave(void)
+sr25519_donna_crit_leave(void)
 {
-    __sync_lock_release(&_sodium_lock);
+    __sync_lock_release(&_sr25519_donna_lock);
 
     return 0;
 }
@@ -130,13 +130,13 @@ sodium_crit_leave(void)
 #else
 
 int
-sodium_crit_enter(void)
+sr25519_donna_crit_enter(void)
 {
     return 0;
 }
 
 int
-sodium_crit_leave(void)
+sr25519_donna_crit_leave(void)
 {
     return 0;
 }
@@ -146,12 +146,12 @@ sodium_crit_leave(void)
 static void (*_misuse_handler)(void);
 
 void
-sodium_misuse(void)
+sr25519_donna_misuse(void)
 {
     void (*handler)(void);
 
-    (void) sodium_crit_leave();
-    if (sodium_crit_enter() == 0) {
+    (void) sr25519_donna_crit_leave();
+    if (sr25519_donna_crit_enter() == 0) {
         handler = _misuse_handler;
         if (handler != NULL) {
             handler();
