@@ -63,14 +63,14 @@ void sr25519_keypair_ed25519_to_uniform(sr25519_keypair uniform_keypair, const s
  * secret: the secret key of the keypair to sign the message, 64 bytes long
  * message and message_length: message arrary and length
 */
-void sr25519_sign(sr25519_signature signature, const sr25519_public_key public, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length);
+void sr25519_sign(sr25519_signature signature, const sr25519_public_key public_key, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length);
 
 /*
  * signature: the signature bytes to verify, 64 bytes long
  * message and message_length: message arrary and length
  * public: the corresponding public key that signing the message, 32 bytes long
 */
-bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public);
+bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public_key);
 
 /*
  * derived: the derived keypair, 96 bytes long
@@ -84,7 +84,7 @@ void sr25519_derive_keypair_soft(sr25519_keypair derived, const sr25519_keypair 
  * public: the input public key, 32 bytes long
  * chain_code: the input chain code, 32 bytes long
 */
-void sr25519_derive_public_soft(sr25519_public_key derived_public, const sr25519_public_key public, const sr25519_chain_code chain_code);
+void sr25519_derive_public_soft(sr25519_public_key derived_public, const sr25519_public_key public_key, const sr25519_chain_code chain_code);
 
 /*
  * derived: the derived keypair, 96 bytes long
@@ -109,6 +109,6 @@ VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, cons
  * threshold: the vrf threshold, 16 bytes long, if the raw output bytes is less than threshold, the is_less field of result structure will be true
  * If errors, is_less field of the returned structure is not meant to contain a valid value
 */
-VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *message, unsigned long message_length, const sr25519_vrf_output output, const sr25519_vrf_proof proof, const sr25519_vrf_threshold threshold);
+VrfResult sr25519_vrf_verify(const sr25519_public_key public_key, const uint8_t *message, unsigned long message_length, const sr25519_vrf_output output, const sr25519_vrf_proof proof, const sr25519_vrf_threshold threshold);
 
 #endif

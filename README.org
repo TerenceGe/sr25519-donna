@@ -90,7 +90,7 @@ void sr25519_keypair_from_seed(sr25519_keypair keypair, const sr25519_mini_secre
 | public                     | the public key of the keypair to sign the message, 32 bytes long |
 | message and message_length | message arrary and length                                        |
 #+BEGIN_SRC C
-void sr25519_sign(sr25519_signature signature, const sr25519_public_key public, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length);
+void sr25519_sign(sr25519_signature signature, const sr25519_public_key public_key, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length);
 #+END_SRC
 [[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L45][example]]
 ** verify message
@@ -99,7 +99,7 @@ void sr25519_sign(sr25519_signature signature, const sr25519_public_key public, 
 | message and message_length | message arrary and length                                            |
 | public                     | the corresponding public key that signing the message, 32 bytes long |
 #+BEGIN_SRC C
-bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public);
+bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public_key);
 #+END_SRC
 [[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L64][example]]
 ** soft derive keypair
@@ -117,7 +117,7 @@ void sr25519_derive_keypair_soft(sr25519_keypair derived, const sr25519_keypair 
 | public         | the input public key, 32 bytes long   |
 | chain_code     | the input chain code, 32 bytes long   |
 #+BEGIN_SRC C
-void sr25519_derive_public_soft(sr25519_public_key derived_public, const sr25519_public_key public, const sr25519_chain_code chain_code);
+void sr25519_derive_public_soft(sr25519_public_key derived_public, const sr25519_public_key public_key, const sr25519_chain_code chain_code);
 #+END_SRC
 [[https://github.com/TerenceGe/sr25519-donna/blob/954fc1ff50aa919a05b23e28695dc92cab510467/example/src/main.c#L100][example]]
 ** hard derive keypair
@@ -151,7 +151,7 @@ VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, cons
 | proof                      | the proof of the signature                                                                                                            |
 | threshold                  | the vrf threshold, 16 bytes long, if the raw output bytes is less than threshold, the is_less field of result structure will be true. If errors, is_less field of the returned structure is not meant to contain a valid value                          |
 #+BEGIN_SRC C
-VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *message, unsigned long message_length, const sr25519_vrf_output output, const sr25519_vrf_proof proof, const sr25519_vrf_threshold threshold);
+VrfResult sr25519_vrf_verify(const sr25519_public_key public_key, const uint8_t *message, unsigned long message_length, const sr25519_vrf_output output, const sr25519_vrf_proof proof, const sr25519_vrf_threshold threshold);
 #+END_SRC
 [[https://github.com/TerenceGe/sr25519-donna/blob/dc22624e80ce1c8fb4df0936678f6edcd8021dfd/example/src/main.c#L169][example]]
 ** vrf result

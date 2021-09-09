@@ -65,9 +65,9 @@ void hard_derive_mini_secret_key(sr25519_mini_secret_key key_out, sr25519_chain_
     merlin_transcript_challenge_bytes(&t, (uint8_t *)"HDKD-chaincode", 14, chain_code_out, 32);
 }
 
-void derive_scalar_and_chaincode(merlin_transcript *t, bignum256modm *scalar, sr25519_chain_code chain_code_out, const sr25519_public_key public, const sr25519_chain_code chain_code_in) {
+void derive_scalar_and_chaincode(merlin_transcript *t, bignum256modm *scalar, sr25519_chain_code chain_code_out, const sr25519_public_key public_key, const sr25519_chain_code chain_code_in) {
     if (chain_code_in != NULL) merlin_transcript_commit_bytes(t, (uint8_t *)"chain-code", 10, chain_code_in, 32);
-    merlin_transcript_commit_bytes(t, (uint8_t *)"public-key", 10, public, 32);
+    merlin_transcript_commit_bytes(t, (uint8_t *)"public-key", 10, public_key, 32);
 
     uint8_t buf[64] = {0};
     merlin_transcript_challenge_bytes(t, (uint8_t *)"HDKD-scalar", 11, buf, 64);
@@ -76,7 +76,7 @@ void derive_scalar_and_chaincode(merlin_transcript *t, bignum256modm *scalar, sr
     merlin_transcript_challenge_bytes(t, (uint8_t *)"HDKD-chaincode", 14, chain_code_out, 32);
 }
 
-void derived_secret_key_simple(sr25519_secret_key_key key_out, sr25519_secret_key_nonce nonce_out, sr25519_chain_code chain_code_out, const sr25519_public_key public, const sr25519_secret_key_key key_in, const sr25519_secret_key_nonce nonce_in, const sr25519_chain_code chain_code_in) {
+void derived_secret_key_simple(sr25519_secret_key_key key_out, sr25519_secret_key_nonce nonce_out, sr25519_chain_code chain_code_out, const sr25519_public_key public_key, const sr25519_secret_key_key key_in, const sr25519_secret_key_nonce nonce_in, const sr25519_chain_code chain_code_in) {
     merlin_transcript t = {0};
 
     merlin_transcript_init(&t, (uint8_t *)"SchnorrRistrettoHDKD", 20);
@@ -84,7 +84,7 @@ void derived_secret_key_simple(sr25519_secret_key_key key_out, sr25519_secret_ke
 
     bignum256modm scalar = {0};
 
-    derive_scalar_and_chaincode(&t, &scalar, chain_code_out, public, chain_code_in);
+    derive_scalar_and_chaincode(&t, &scalar, chain_code_out, public_key, chain_code_in);
 
     bignum256modm original_scalar = {0};
     bignum256modm final_scalar = {0};
@@ -169,15 +169,15 @@ void sr25519_derive_keypair_soft(sr25519_keypair keypair_out, const sr25519_keyp
     divide_scalar_bytes_by_cofactor(key_in, 32);
     sr25519_secret_key_nonce nonce_in = {0};
     memcpy(nonce_in, keypair_in + 32, 32);
-    sr25519_public_key public = {0};
-    memcpy(public, keypair_in + 64, 32);
+    sr25519_public_key public_key = {0};
+    memcpy(public_key, keypair_in + 64, 32);
 
     sr25519_secret_key_key key_out = {0};
     sr25519_secret_key_nonce nonce_out = {0};
     sr25519_public_key public_out = {0};
     sr25519_chain_code chain_code_out = {0};
 
-    derived_secret_key_simple(key_out, nonce_out, chain_code_out, public, key_in, nonce_in, chain_code_in);
+    derived_secret_key_simple(key_out, nonce_out, chain_code_out, public_key, key_in, nonce_in, chain_code_in);
 
     private_key_to_public_key(public_out, key_out);
     multiply_scalar_bytes_by_cofactor(key_out, 32);
@@ -204,7 +204,7 @@ void sr25519_derive_public_soft(sr25519_public_key public_out, const sr25519_pub
     ristretto_encode(public_out, P);
 }
 
-void sr25519_sign(sr25519_signature signature_out, const sr25519_public_key public, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length) {
+void sr25519_sign(sr25519_signature signature_out, const sr25519_public_key public_key, const sr25519_secret_key secret, const uint8_t *message, unsigned long message_length) {
     sr25519_secret_key_key secret_key = {0};
     sr25519_secret_key_nonce secret_nonce = {0};
     memcpy(secret_key, secret, 32);
@@ -217,7 +217,7 @@ void sr25519_sign(sr25519_signature signature_out, const sr25519_public_key publ
     merlin_transcript_commit_bytes(&t, (uint8_t *)"sign-bytes", 10, message, message_length);
 
     merlin_transcript_commit_bytes(&t, (uint8_t *)"proto-name", 10, (uint8_t *)"Schnorr-sig", 11);
-    merlin_transcript_commit_bytes(&t, (uint8_t *)"sign:pk", 7, public, 32);
+    merlin_transcript_commit_bytes(&t, (uint8_t *)"sign:pk", 7, public_key, 32);
 
     bignum256modm r = {0};
     uint8_t scalar_bytes[64] = {0};
@@ -258,7 +258,7 @@ void sr25519_sign(sr25519_signature signature_out, const sr25519_public_key publ
     signature_out[63] |= 128;
 }
 
-bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public) {
+bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, unsigned long message_length, const sr25519_public_key public_key) {
     uint8_t signature_s[32] = {0};
     memcpy(signature_s, signature + 32, 32);
 
@@ -286,7 +286,7 @@ bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, u
     merlin_transcript_commit_bytes(&t, (uint8_t *)"sign-bytes", 10, message, message_length);
 
     merlin_transcript_commit_bytes(&t, (uint8_t *)"proto-name", 10, (uint8_t *)"Schnorr-sig", 11);
-    merlin_transcript_commit_bytes(&t, (uint8_t *)"sign:pk", 7, public, 32);
+    merlin_transcript_commit_bytes(&t, (uint8_t *)"sign:pk", 7, public_key, 32);
     merlin_transcript_commit_bytes(&t, (uint8_t *)"sign:R", 6, signature_R, 32);
 
     bignum256modm k = {0}, s = {0};
@@ -302,7 +302,7 @@ bool sr25519_verify(const sr25519_signature signature, const uint8_t *message, u
     }
 
     ge25519 A = {0}, R = {0};
-    ristretto_decode(&A, public);
+    ristretto_decode(&A, public_key);
     curve25519_neg(A.x, A.x);
     curve25519_neg(A.t, A.t);
     ge25519_double_scalarmult_vartime(&R, &A, k, s);
@@ -365,7 +365,7 @@ VrfResult sr25519_vrf_sign_if_less(sr25519_vrf_out_and_proof out_and_proof, cons
     }
 }
 
-VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *message, unsigned long message_length, const sr25519_vrf_output output, const sr25519_vrf_proof proof, const sr25519_vrf_threshold threshold) {
+VrfResult sr25519_vrf_verify(const sr25519_public_key public_key, const uint8_t *message, unsigned long message_length, const sr25519_vrf_output output, const sr25519_vrf_proof proof, const sr25519_vrf_threshold threshold) {
     merlin_transcript t1 = {0};
     merlin_transcript_init(&t1, (uint8_t *)"SigningContext", 14);
     merlin_transcript_commit_bytes(&t1, (uint8_t *)"", 0, (uint8_t *)"substrate", 9);
@@ -373,7 +373,7 @@ VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *mes
 
     sr25519_vrf_io inout = {0};
     sr25519_vrf_proof_batchable proof_batchable = {0};
-    Sr25519SignatureResult verify_result = vrf_verify(inout, proof_batchable, public, &t1, output, proof);
+    Sr25519SignatureResult verify_result = vrf_verify(inout, proof_batchable, public_key, &t1, output, proof);
 
     if (verify_result != Ok) {
         VrfResult vrf_result = {0};
@@ -401,7 +401,7 @@ VrfResult sr25519_vrf_verify(const sr25519_public_key public, const uint8_t *mes
     merlin_transcript_commit_bytes(&t2, (uint8_t *)"", 0, (uint8_t *)"substrate", 9);
     merlin_transcript_commit_bytes(&t2, (uint8_t *)"sign-bytes", 10, message, message_length);
     sr25519_vrf_proof decomp_proof = {0};
-    Sr25519SignatureResult shorten_result = shorten_vrf(decomp_proof, proof_batchable, public, &t2, verify_output);
+    Sr25519SignatureResult shorten_result = shorten_vrf(decomp_proof, proof_batchable, public_key, &t2, verify_output);
 
     if (shorten_result != Ok) {
         VrfResult vrf_result = {0};

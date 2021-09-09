@@ -10,10 +10,10 @@ Sr25519SignatureResult vrf_sign(sr25519_vrf_io inout, sr25519_vrf_proof proof, s
     memcpy(secret_key, keypair, 32);
     sr25519_secret_key_nonce secret_nonce = {0};
     memcpy(secret_nonce, keypair + 32, 32);
-    sr25519_public_key public = {0};
-    memcpy(public, keypair + 64, 32);
+    sr25519_public_key public_key = {0};
+    memcpy(public_key, keypair + 64, 32);
 
-    merlin_transcript_commit_bytes(t, (uint8_t *)"vrf-nm-pk", 9, public, 32);
+    merlin_transcript_commit_bytes(t, (uint8_t *)"vrf-nm-pk", 9, public_key, 32);
     uint8_t b[64] = {0};
     merlin_transcript_challenge_bytes(t, (uint8_t *)"VRFHash", 7, b, 64);
 
@@ -45,7 +45,7 @@ Sr25519SignatureResult vrf_sign(sr25519_vrf_io inout, sr25519_vrf_proof proof, s
     merlin_transcript_commit_bytes(&e, (uint8_t *)"proto-name", 10, (uint8_t *)"DLEQProof", 9);
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:h", 5, input_compressed, 32);
     if (!KUSAMA_VRF) {
-        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public, 32);
+        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public_key, 32);
     }
 
     bignum256modm r_scalar = {0};
@@ -74,7 +74,7 @@ Sr25519SignatureResult vrf_sign(sr25519_vrf_io inout, sr25519_vrf_proof proof, s
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:h^r", 7, Hr_compressed, 32);
 
     if (KUSAMA_VRF) {
-        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public, 32);
+        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public_key, 32);
     }
 
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:h^sk", 8, output_compressed, 32);
@@ -107,8 +107,8 @@ Sr25519SignatureResult vrf_sign(sr25519_vrf_io inout, sr25519_vrf_proof proof, s
     return result;
 }
 
-Sr25519SignatureResult shorten_vrf(sr25519_vrf_proof proof, const sr25519_vrf_proof_batchable proof_batchable, const sr25519_public_key public, const merlin_transcript *t, const sr25519_vrf_output preout) {
-    merlin_transcript_commit_bytes(t, (uint8_t *)"vrf-nm-pk", 9, public, 32);
+Sr25519SignatureResult shorten_vrf(sr25519_vrf_proof proof, const sr25519_vrf_proof_batchable proof_batchable, const sr25519_public_key public_key, const merlin_transcript *t, const sr25519_vrf_output preout) {
+    merlin_transcript_commit_bytes(t, (uint8_t *)"vrf-nm-pk", 9, public_key, 32);
     uint8_t b[64] = {0};
     merlin_transcript_challenge_bytes(t, (uint8_t *)"VRFHash", 7, b, 64);
     ge25519 input = {0};
@@ -124,7 +124,7 @@ Sr25519SignatureResult shorten_vrf(sr25519_vrf_proof proof, const sr25519_vrf_pr
     merlin_transcript_commit_bytes(&e, (uint8_t *)"proto-name", 10, (uint8_t *)"DLEQProof", 9);
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:h", 5, input_compressed, 32);
     if (!KUSAMA_VRF) {
-        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public, 32);
+        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public_key, 32);
     }
 
     uint8_t R[32] = {0};
@@ -137,7 +137,7 @@ Sr25519SignatureResult shorten_vrf(sr25519_vrf_proof proof, const sr25519_vrf_pr
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:R=g^r", 9, R, 32);
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:h^r", 7, Hr, 32);
     if (KUSAMA_VRF) {
-        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public, 32);
+        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public_key, 32);
     }
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:h^sk", 8, output_compressed, 32);
 
@@ -156,13 +156,13 @@ Sr25519SignatureResult shorten_vrf(sr25519_vrf_proof proof, const sr25519_vrf_pr
     return result;
 }
 
-Sr25519SignatureResult vrf_verify(sr25519_vrf_io inout, sr25519_vrf_proof_batchable proof_batchable, const sr25519_public_key public, const merlin_transcript *t, const sr25519_vrf_output preout, const sr25519_vrf_proof proof) {
+Sr25519SignatureResult vrf_verify(sr25519_vrf_io inout, sr25519_vrf_proof_batchable proof_batchable, const sr25519_public_key public_key, const merlin_transcript *t, const sr25519_vrf_output preout, const sr25519_vrf_proof proof) {
     uint8_t c[32] = {0};
     memcpy(c, proof, 32);
     uint8_t s[32] = {0};
     memcpy(s, proof + 32, 32);
 
-    merlin_transcript_commit_bytes(t, (uint8_t *)"vrf-nm-pk", 9, public, 32);
+    merlin_transcript_commit_bytes(t, (uint8_t *)"vrf-nm-pk", 9, public_key, 32);
     uint8_t b[64] = {0};
     merlin_transcript_challenge_bytes(t, (uint8_t *)"VRFHash", 7, b, 64);
     ge25519 input = {0};
@@ -181,11 +181,11 @@ Sr25519SignatureResult vrf_verify(sr25519_vrf_io inout, sr25519_vrf_proof_batcha
     merlin_transcript_commit_bytes(&e, (uint8_t *)"proto-name", 10, (uint8_t *)"DLEQProof", 9);
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:h", 5, input_compressed, 32);
     if (!KUSAMA_VRF) {
-        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public, 32);
+        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public_key, 32);
     }
 
     ge25519 R, P = {0};
-    ristretto_decode(&P, public);
+    ristretto_decode(&P, public_key);
     bignum256modm c_scalar = {0};
     expand_raw256_modm(c_scalar, c);
     bignum256modm s_scalar = {0};
@@ -205,7 +205,7 @@ Sr25519SignatureResult vrf_verify(sr25519_vrf_io inout, sr25519_vrf_proof_batcha
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:h^r", 7, Hr_compressed, 32);
 
     if (KUSAMA_VRF) {
-        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public, 32);
+        merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:pk", 6, public_key, 32);
     }
     merlin_transcript_commit_bytes(&e, (uint8_t *)"vrf:h^sk", 8, output_compressed, 32);
 

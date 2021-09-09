@@ -72,12 +72,12 @@ void can_sign_and_verify_message() {
     sr25519_keypair_from_seed(keypair, seed);
     sr25519_secret_key private = {0};
     memcpy(private, keypair, 64);
-    sr25519_public_key public = {0};
-    memcpy(public, keypair + 64, 32);
+    sr25519_public_key public_key = {0};
+    memcpy(public_key, keypair + 64, 32);
     uint8_t *message = "this is a message";
     sr25519_signature signature = {0};
-    sr25519_sign(signature, public, private, message, strlen(message));
-    bool is_valid = sr25519_verify(signature, message, strlen(message), public);
+    sr25519_sign(signature, public_key, private, message, strlen(message));
+    bool is_valid = sr25519_verify(signature, message, strlen(message), public_key);
 
     if (!is_valid) {
         printf("failed!\n");
@@ -90,11 +90,11 @@ void can_verify_known_message() {
     printf("test can verify known message: ");
 
     uint8_t *message = "I hereby verify that I control 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
-    sr25519_public_key public = {0};
-    memcpy(public, fromhex("d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d"), 32);
+    sr25519_public_key public_key = {0};
+    memcpy(public_key, fromhex("d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d"), 32);
     sr25519_signature signature = {0};
     memcpy(signature, fromhex("1037eb7e51613d0dcf5930ae518819c87d655056605764840d9280984e1b7063c4566b55bf292fcab07b369d01095879b50517beca4d26e6a65866e25fec0d83"), 64);
-    bool is_valid = sr25519_verify(signature, message, strlen(message), public);
+    bool is_valid = sr25519_verify(signature, message, strlen(message), public_key);
 
     if (!is_valid) {
         printf("failed!\n");
@@ -116,10 +116,10 @@ void soft_derives_pair() {
     sr25519_keypair_from_seed(keypair, seed);
     sr25519_keypair derived = {0};
     sr25519_derive_keypair_soft(derived, keypair, cc);
-    sr25519_public_key public = {0};
-    memcpy(public, derived + 64, 32);
+    sr25519_public_key public_key = {0};
+    memcpy(public_key, derived + 64, 32);
 
-    if (!uint8_32_ct_eq(public, expected)) {
+    if (!uint8_32_ct_eq(public_key, expected)) {
         printf("failed!\n");
     } else {
         printf("success!\n");
@@ -132,12 +132,12 @@ void soft_derives_public() {
 
     sr25519_chain_code cc = {0};
     memcpy(cc, fromhex("0c666f6f00000000000000000000000000000000000000000000000000000000"), 32);
-    sr25519_public_key public = {0};
-    memcpy(public, fromhex("46ebddef8cd9bb167dc30878d7113b7e168e6f0646beffd77d69d39bad76b47a"), 32);
+    sr25519_public_key public_key = {0};
+    memcpy(public_key, fromhex("46ebddef8cd9bb167dc30878d7113b7e168e6f0646beffd77d69d39bad76b47a"), 32);
     sr25519_public_key expected = {0};
     memcpy(expected, fromhex("40b9675df90efa6069ff623b0fdfcf706cd47ca7452a5056c7ad58194d23440a"), 32);
     sr25519_public_key derived = {0};
-    sr25519_derive_public_soft(derived, public, cc);
+    sr25519_derive_public_soft(derived, public_key, cc);
 
     if (!uint8_32_ct_eq(derived, expected)) {
         printf("failed!\n");
@@ -159,10 +159,10 @@ void hard_derives_pair() {
     sr25519_keypair_from_seed(keypair, seed);
     sr25519_keypair derived = {0};
     sr25519_derive_keypair_hard(derived, keypair, cc);
-    sr25519_public_key public = {0};
-    memcpy(public, derived + 64, 32);
+    sr25519_public_key public_key = {0};
+    memcpy(public_key, derived + 64, 32);
 
-    if (!uint8_32_ct_eq(public, expected)) {
+    if (!uint8_32_ct_eq(public_key, expected)) {
         printf("failed!\n");
     } else {
         printf("success!\n");
@@ -177,8 +177,8 @@ void vrf_verify() {
 
     sr25519_keypair keypair = {0};
     sr25519_uniform_keypair_from_seed(keypair, seed);
-    sr25519_public_key public = {0};
-    memcpy(public, keypair + 64, 32);
+    sr25519_public_key public_key = {0};
+    memcpy(public_key, keypair + 64, 32);
 
     sr25519_vrf_threshold limit = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     sr25519_vrf_out_and_proof out_and_proof  = {0};
@@ -194,7 +194,7 @@ void vrf_verify() {
     sr25519_vrf_proof proof = {0};
     memcpy(proof, out_and_proof + 32, 64);
 
-    VrfResult res2 = sr25519_vrf_verify(public, (uint8_t *)"Hello, world!", 13, output, proof, limit);
+    VrfResult res2 = sr25519_vrf_verify(public_key, (uint8_t *)"Hello, world!", 13, output, proof, limit);
 
     if (res2.result != Ok || !res2.is_less) {
         printf("failed!\n");
@@ -202,7 +202,7 @@ void vrf_verify() {
     }
 
     output[5] += 3;
-    VrfResult res3 = sr25519_vrf_verify(public, (uint8_t *)"Hello, world!", 13, output, proof, limit);
+    VrfResult res3 = sr25519_vrf_verify(public_key, (uint8_t *)"Hello, world!", 13, output, proof, limit);
 
     if (res3.result == Ok || res3.is_less) {
         printf("failed!\n");
