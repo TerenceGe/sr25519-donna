@@ -44,7 +44,7 @@ const uint8_t *fromhex(const char *str) {
   return buf;
 }
 
-void creates_pair_from_known_seed() {
+void test_creates_pair_from_known_seed() {
     printf("test creates pair from known seed: ");
 
     sr25519_mini_secret_key seed = {0};
@@ -63,7 +63,7 @@ void creates_pair_from_known_seed() {
     }
 }
 
-void can_sign_and_verify_message() {
+void test_can_sign_and_verify_message() {
     printf("test can sign and verify message: ");
 
     sr25519_mini_secret_key seed = {0};
@@ -86,7 +86,7 @@ void can_sign_and_verify_message() {
     }
 }
 
-void can_verify_known_message() {
+void test_can_verify_known_message() {
     printf("test can verify known message: ");
 
     uint8_t *message = "I hereby verify that I control 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
@@ -103,7 +103,7 @@ void can_verify_known_message() {
     }
 }
 
-void soft_derives_pair() {
+void test_soft_derives_pair() {
     printf("test soft derives pair: ");
 
     sr25519_chain_code cc = {0};
@@ -127,7 +127,7 @@ void soft_derives_pair() {
 
 }
 
-void soft_derives_public() {
+void test_soft_derives_public() {
     printf("test soft derives public: ");
 
     sr25519_chain_code cc = {0};
@@ -146,7 +146,7 @@ void soft_derives_public() {
     }
 }
 
-void hard_derives_pair() {
+void test_hard_derives_pair() {
     printf("test hard derives pair: ");
 
     sr25519_chain_code cc = {0};
@@ -169,7 +169,7 @@ void hard_derives_pair() {
     }
 }
 
-void vrf_verify() {
+void test_vrf_verify() {
     printf("test vrf verify: ");
 
     sr25519_mini_secret_key seed = {0};
@@ -212,7 +212,7 @@ void vrf_verify() {
     printf("success!\n");
 }
 
-void vrf_result_not_less() {
+void test_vrf_result_not_less() {
     printf("test vrf result not less: ");
 
     sr25519_keypair keypair = {0};
@@ -235,7 +235,7 @@ void vrf_result_not_less() {
     printf("success!\n");
 }
 
-void vrf_sign_and_check() {
+void test_vrf_sign_and_check() {
     printf("test vrf sign and check: ");
 
     sr25519_keypair keypair = {0};
@@ -253,15 +253,15 @@ void vrf_sign_and_check() {
 }
 
 int main(int argc, char *argv[]) {
-    creates_pair_from_known_seed();
-    can_sign_and_verify_message();
-    can_verify_known_message();
-    soft_derives_pair();
-    soft_derives_public();
-    hard_derives_pair();
-    vrf_verify();
-    vrf_result_not_less();
-    vrf_sign_and_check();
+    test_creates_pair_from_known_seed();
+    test_can_sign_and_verify_message();
+    test_can_verify_known_message();
+    test_soft_derives_pair();
+    test_soft_derives_public();
+    test_hard_derives_pair();
+    test_vrf_verify();
+    test_vrf_result_not_less();
+    test_vrf_sign_and_check();
 
     return 0;
 }
